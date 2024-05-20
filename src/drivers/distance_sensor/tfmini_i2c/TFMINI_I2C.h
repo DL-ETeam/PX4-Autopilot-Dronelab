@@ -32,7 +32,8 @@
  ****************************************************************************/
 
 #pragma once
-
+// yaad rakhna, uorb alag alag honge alag alag sensors ke liye, multiple ko implement karne
+// mein yaad rahe
 #include <px4_platform_common/module.h>
 #include <px4_platform_common/module_params.h>
 #include <uORB/SubscriptionInterval.hpp>

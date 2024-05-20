@@ -31,6 +31,7 @@
  *
  ****************************************************************************/
 
+// Benewake Tfmini Plus I2C can take addresses from 0x01 to 0x7F
 
 /**
  * Enable Benewake Tfmini Plus I2C rangefinder
@@ -39,7 +40,13 @@
  * @min 0
  * @max 1
  * @group Sensors
- * @value 0 Disabled
- * @value 1 Autodetect
+ * @value 0 None
+ * @value 1 One
+ * @value 2 Two
+ * @value 3 Three
+ * .
+ * .
+ * .
+ * @value 128 One hundred and Twenty Eight
  */
-PARAM_DEFINE_INT32(SENS_EN_TFMINIPLUSI2C, 0);
+PARAM_DEFINE_INT32(SENS_EN_NumberTFMINIPLUSI2C, 0);

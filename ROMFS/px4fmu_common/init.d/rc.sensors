@@ -52,6 +52,13 @@ then
 	mb12xx start -X
 fi
 
+# TFmini Plus I2C Lidar
+if param greater -s SENS_EN_TFMI2C 0
+then
+	tfmini_i2c start -X
+fi
+
+
 # pga460 sonar sensor
 if param greater -s SENS_EN_PGA460 0
 then

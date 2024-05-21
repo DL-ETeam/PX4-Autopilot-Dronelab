@@ -41,21 +41,21 @@
 
 using namespace time_literals;
 
-extern "C" __EXPORT int TFMINI_I2C_main(int argc, char *argv[]);
+extern "C" __EXPORT int tfmini_i2c_main(int argc, char *argv[]);
 
 
-class TFMINI_I2C : public ModuleBase<TFMINI_I2C>, public ModuleParams
+class TFMINII2C : public ModuleBase<TFMINII2C>, public ModuleParams
 {
 public:
-	TFMINI_I2C(int example_param, bool example_flag);
+	TFMINII2C(int example_param, bool example_flag);
 
-	virtual ~TFMINI_I2C() = default;
+	virtual ~TFMINII2C() = default;
 
 	/** @see ModuleBase */
 	static int task_spawn(int argc, char *argv[]);
 
 	/** @see ModuleBase */
-	static TFMINI_I2C *instantiate(int argc, char *argv[]);
+	static TFMINII2C *instantiate(int argc, char *argv[]);
 
 	/** @see ModuleBase */
 	static int custom_command(int argc, char *argv[]);
@@ -80,9 +80,20 @@ private:
 
 
 	DEFINE_PARAMETERS(
-		(ParamInt<px4::params::SYS_AUTOSTART>) _param_sys_autostart,   /**< example parameter */
-		(ParamInt<px4::params::SYS_AUTOCONFIG>) _param_sys_autoconfig  /**< another parameter */
-	)
+		(ParamInt<px4::params::SENS_EN_TFMI2C>)   _p_sensor_enabled,
+		(ParamInt<px4::params::SENS_EN_TFM0_OR>)  _p_sensor0_rot,
+		(ParamInt<px4::params::SENS_EN_TFM1_OR>)  _p_sensor1_rot,
+		(ParamInt<px4::params::SENS_EN_TFM2_OR>)  _p_sensor2_rot,
+		(ParamInt<px4::params::SENS_EN_TFM3_OR>)  _p_sensor3_rot,
+		(ParamInt<px4::params::SENS_EN_TFM4_OR>)  _p_sensor4_rot,
+		(ParamInt<px4::params::SENS_EN_TFM5_OR>)  _p_sensor5_rot,
+		(ParamInt<px4::params::SENS_EN_TFM6_OR>)  _p_sensor6_rot,
+		(ParamInt<px4::params::SENS_EN_TFM7_OR>)  _p_sensor7_rot,
+		(ParamInt<px4::params::SENS_EN_TFM8_OR>)  _p_sensor8_rot,
+		(ParamInt<px4::params::SENS_EN_TFM9_OR>)  _p_sensor9_rot,
+		(ParamInt<px4::params::SENS_EN_TFM10_OR>) _p_sensor10_rot,
+		(ParamInt<px4::params::SENS_EN_TFM11_OR>) _p_sensor11_rot
+	);
 
 	// Subscriptions
 	uORB::SubscriptionInterval _parameter_update_sub{ORB_ID(parameter_update), 1_s};

@@ -34,7 +34,6 @@ px4_add_module(
 	MODULE drivers__tfmini_i2c
 	MAIN tfmini_i2c
 	SRCS
-		tfmini_i2c_main.cpp
 		TFMINI_I2C.cpp
 		TFMINI_I2C.h
 	DEPENDS

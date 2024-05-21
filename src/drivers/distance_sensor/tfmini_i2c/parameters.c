@@ -31,22 +31,267 @@
  *
  ****************************************************************************/
 
-// Benewake Tfmini Plus I2C can take addresses from 0x01 to 0x7F
 
 /**
- * Enable Benewake Tfmini Plus I2C rangefinder
+ * Enable TFmini Plus I2C rangefinder (i2c)
  *
  * @reboot_required true
  * @min 0
  * @max 1
  * @group Sensors
- * @value 0 None
- * @value 1 One
- * @value 2 Two
- * @value 3 Three
- * .
- * .
- * .
- * @value 128 One hundred and Twenty Eight
+ * @value 0 Disabled
+ * @value 1 Autodetect
  */
-PARAM_DEFINE_INT32(SENS_EN_NumberTFMINIPLUSI2C, 0);
+PARAM_DEFINE_INT32(SENS_EN_TFMI2C, 0);
+
+/**
+ * TFmini Plus I2C Sensor 0 Rotation
+ *
+ * This parameter defines the rotation of the TFmini Plus I2C sensor relative to the platform.
+ *
+ * @reboot_required true
+ * @min 0
+ * @max 7
+ * @group Sensors
+ *
+ * @value 0 No rotation
+ * @value 1 Yaw 45°
+ * @value 2 Yaw 90°
+ * @value 3 Yaw 135°
+ * @value 4 Yaw 180°
+ * @value 5 Yaw 225°
+ * @value 6 Yaw 270°
+ * @value 7 Yaw 315°
+ */
+PARAM_DEFINE_INT32(SENS_EN_TFM0_OR, 0);
+
+/**
+ * TFmini Plus I2C Sensor 1 Rotation
+ *
+ * This parameter defines the rotation of the TFmini Plus I2C sensor relative to the platform.
+ *
+ * @reboot_required true
+ * @min 0
+ * @max 7
+ * @group Sensors
+ *
+ * @value 0 No rotation
+ * @value 1 Yaw 45°
+ * @value 2 Yaw 90°
+ * @value 3 Yaw 135°
+ * @value 4 Yaw 180°
+ * @value 5 Yaw 225°
+ * @value 6 Yaw 270°
+ * @value 7 Yaw 315°
+ */
+PARAM_DEFINE_INT32(SENS_EN_TFM1_OR, 0);
+
+/**
+ * TFmini Plus I2C Sensor 2 Rotation
+ *
+ * This parameter defines the rotation of the TFmini Plus I2C sensor relative to the platform.
+ *
+ * @reboot_required true
+ * @min 0
+ * @max 7
+ * @group Sensors
+ *
+ * @value 0 No rotation
+ * @value 1 Yaw 45°
+ * @value 2 Yaw 90°
+ * @value 3 Yaw 135°
+ * @value 4 Yaw 180°
+ * @value 5 Yaw 225°
+ * @value 6 Yaw 270°
+ * @value 7 Yaw 315°
+ */
+PARAM_DEFINE_INT32(SENS_EN_TFM2_OR, 0);
+
+/**
+ * TFmini Plus I2C Sensor 3 Rotation
+ *
+ * This parameter defines the rotation of the TFmini Plus I2C sensor relative to the platform.
+ *
+ * @reboot_required true
+ * @min 0
+ * @max 7
+ * @group Sensors
+ *
+ * @value 0 No rotation
+ * @value 1 Yaw 45°
+ * @value 2 Yaw 90°
+ * @value 3 Yaw 135°
+ * @value 4 Yaw 180°
+ * @value 5 Yaw 225°
+ * @value 6 Yaw 270°
+ * @value 7 Yaw 315°
+ */
+PARAM_DEFINE_INT32(SENS_EN_TFM3_OR, 0);
+
+/**
+ * TFmini Plus I2C Sensor 4 Rotation
+ *
+ * This parameter defines the rotation of the TFmini Plus I2C sensor relative to the platform.
+ *
+ * @reboot_required true
+ * @min 0
+ * @max 7
+ * @group Sensors
+ *
+ * @value 0 No rotation
+ * @value 1 Yaw 45°
+ * @value 2 Yaw 90°
+ * @value 3 Yaw 135°
+ * @value 4 Yaw 180°
+ * @value 5 Yaw 225°
+ * @value 6 Yaw 270°
+ * @value 7 Yaw 315°
+ */
+PARAM_DEFINE_INT32(SENS_EN_TFM4_OR, 0);
+
+/**
+ * TFmini Plus I2C Sensor 5 Rotation
+ *
+ * This parameter defines the rotation of the TFmini Plus I2C sensor relative to the platform.
+ *
+ * @reboot_required true
+ * @min 0
+ * @max 7
+ * @group Sensors
+ *
+ * @value 0 No rotation
+ * @value 1 Yaw 45°
+ * @value 2 Yaw 90°
+ * @value 3 Yaw 135°
+ * @value 4 Yaw 180°
+ * @value 5 Yaw 225°
+ * @value 6 Yaw 270°
+ * @value 7 Yaw 315°
+ */
+PARAM_DEFINE_INT32(SENS_EN_TFM5_OR, 0);
+
+/**
+ * TFmini Plus I2C Sensor 6 Rotation
+ *
+ * This parameter defines the rotation of the TFmini Plus I2C sensor relative to the platform.
+ *
+ * @reboot_required true
+ * @min 0
+ * @max 7
+ * @group Sensors
+ *
+ * @value 0 No rotation
+ * @value 1 Yaw 45°
+ * @value 2 Yaw 90°
+ * @value 3 Yaw 135°
+ * @value 4 Yaw 180°
+ * @value 5 Yaw 225°
+ * @value 6 Yaw 270°
+ * @value 7 Yaw 315°
+ */
+PARAM_DEFINE_INT32(SENS_EN_TFM6_OR, 0);
+
+/**
+ * TFmini Plus I2C Sensor 7 Rotation
+ *
+ * This parameter defines the rotation of the TFmini Plus I2C sensor relative to the platform.
+ *
+ * @reboot_required true
+ * @min 0
+ * @max 7
+ * @group Sensors
+ *
+ * @value 0 No rotation
+ * @value 1 Yaw 45°
+ * @value 2 Yaw 90°
+ * @value 3 Yaw 135°
+ * @value 4 Yaw 180°
+ * @value 5 Yaw 225°
+ * @value 6 Yaw 270°
+ * @value 7 Yaw 315°
+ */
+PARAM_DEFINE_INT32(SENS_EN_TFM7_OR, 0);
+
+/**
+ * TFmini Plus I2C Sensor 8 Rotation
+ *
+ * This parameter defines the rotation of the TFmini Plus I2C sensor relative to the platform.
+ *
+ * @reboot_required true
+ * @min 0
+ * @max 7
+ * @group Sensors
+ *
+ * @value 0 No rotation
+ * @value 1 Yaw 45°
+ * @value 2 Yaw 90°
+ * @value 3 Yaw 135°
+ * @value 4 Yaw 180°
+ * @value 5 Yaw 225°
+ * @value 6 Yaw 270°
+ * @value 7 Yaw 315°
+ */
+PARAM_DEFINE_INT32(SENS_EN_TFM8_OR, 0);
+
+/**
+ * TFmini Plus I2C Sensor 9 Rotation
+ *
+ * This parameter defines the rotation of the TFmini Plus I2C sensor relative to the platform.
+ *
+ * @reboot_required true
+ * @min 0
+ * @max 7
+ * @group Sensors
+ *
+ * @value 0 No rotation
+ * @value 1 Yaw 45°
+ * @value 2 Yaw 90°
+ * @value 3 Yaw 135°
+ * @value 4 Yaw 180°
+ * @value 5 Yaw 225°
+ * @value 6 Yaw 270°
+ * @value 7 Yaw 315°
+ */
+PARAM_DEFINE_INT32(SENS_EN_TFM9_OR, 0);
+
+/**
+ * TFmini Plus I2C Sensor 10 Rotation
+ *
+ * This parameter defines the rotation of the TFmini Plus I2C sensor relative to the platform.
+ *
+ * @reboot_required true
+ * @min 0
+ * @max 7
+ * @group Sensors
+ *
+ * @value 0 No rotation
+ * @value 1 Yaw 45°
+ * @value 2 Yaw 90°
+ * @value 3 Yaw 135°
+ * @value 4 Yaw 180°
+ * @value 5 Yaw 225°
+ * @value 6 Yaw 270°
+ * @value 7 Yaw 315°
+ */
+PARAM_DEFINE_INT32(SENS_EN_TFM10_OR, 0);
+
+/**
+ * TFmini Plus I2C Sensor 12 Rotation
+ *
+ * This parameter defines the rotation of the TFmini Plus I2C sensor relative to the platform.
+ *
+ * @reboot_required true
+ * @min 0
+ * @max 7
+ * @group Sensors
+ *
+ * @value 0 No rotation
+ * @value 1 Yaw 45°
+ * @value 2 Yaw 90°
+ * @value 3 Yaw 135°
+ * @value 4 Yaw 180°
+ * @value 5 Yaw 225°
+ * @value 6 Yaw 270°
+ * @value 7 Yaw 315°
+ */
+PARAM_DEFINE_INT32(SENS_EN_TFM11_OR, 0);

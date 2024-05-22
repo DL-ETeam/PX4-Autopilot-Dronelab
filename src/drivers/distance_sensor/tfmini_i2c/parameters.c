@@ -63,7 +63,7 @@ PARAM_DEFINE_INT32(SENS_EN_TFMI2C, 0);
  * @value 6 Yaw 270°
  * @value 7 Yaw 315°
  */
-PARAM_DEFINE_INT32(SENS_EN_TFM0_OR, 0);
+PARAM_DEFINE_INT32(SENS_TFM_0_ORT, 0);
 
 /**
  * TFmini Plus I2C Sensor 1 Rotation
@@ -84,7 +84,7 @@ PARAM_DEFINE_INT32(SENS_EN_TFM0_OR, 0);
  * @value 6 Yaw 270°
  * @value 7 Yaw 315°
  */
-PARAM_DEFINE_INT32(SENS_EN_TFM1_OR, 0);
+PARAM_DEFINE_INT32(SENS_TFM_1_ORT, 0);
 
 /**
  * TFmini Plus I2C Sensor 2 Rotation
@@ -105,7 +105,7 @@ PARAM_DEFINE_INT32(SENS_EN_TFM1_OR, 0);
  * @value 6 Yaw 270°
  * @value 7 Yaw 315°
  */
-PARAM_DEFINE_INT32(SENS_EN_TFM2_OR, 0);
+PARAM_DEFINE_INT32(SENS_TFM_2_ORT, 0);
 
 /**
  * TFmini Plus I2C Sensor 3 Rotation
@@ -126,7 +126,7 @@ PARAM_DEFINE_INT32(SENS_EN_TFM2_OR, 0);
  * @value 6 Yaw 270°
  * @value 7 Yaw 315°
  */
-PARAM_DEFINE_INT32(SENS_EN_TFM3_OR, 0);
+PARAM_DEFINE_INT32(SENS_TFM_3_ORT, 0);
 
 /**
  * TFmini Plus I2C Sensor 4 Rotation
@@ -147,7 +147,7 @@ PARAM_DEFINE_INT32(SENS_EN_TFM3_OR, 0);
  * @value 6 Yaw 270°
  * @value 7 Yaw 315°
  */
-PARAM_DEFINE_INT32(SENS_EN_TFM4_OR, 0);
+PARAM_DEFINE_INT32(SENS_TFM_4_ORT, 0);
 
 /**
  * TFmini Plus I2C Sensor 5 Rotation
@@ -168,7 +168,7 @@ PARAM_DEFINE_INT32(SENS_EN_TFM4_OR, 0);
  * @value 6 Yaw 270°
  * @value 7 Yaw 315°
  */
-PARAM_DEFINE_INT32(SENS_EN_TFM5_OR, 0);
+PARAM_DEFINE_INT32(SENS_TFM_5_ORT, 0);
 
 /**
  * TFmini Plus I2C Sensor 6 Rotation
@@ -189,7 +189,7 @@ PARAM_DEFINE_INT32(SENS_EN_TFM5_OR, 0);
  * @value 6 Yaw 270°
  * @value 7 Yaw 315°
  */
-PARAM_DEFINE_INT32(SENS_EN_TFM6_OR, 0);
+PARAM_DEFINE_INT32(SENS_TFM_6_ORT, 0);
 
 /**
  * TFmini Plus I2C Sensor 7 Rotation
@@ -210,7 +210,7 @@ PARAM_DEFINE_INT32(SENS_EN_TFM6_OR, 0);
  * @value 6 Yaw 270°
  * @value 7 Yaw 315°
  */
-PARAM_DEFINE_INT32(SENS_EN_TFM7_OR, 0);
+PARAM_DEFINE_INT32(SENS_TFM_7_ORT, 0);
 
 /**
  * TFmini Plus I2C Sensor 8 Rotation
@@ -231,7 +231,7 @@ PARAM_DEFINE_INT32(SENS_EN_TFM7_OR, 0);
  * @value 6 Yaw 270°
  * @value 7 Yaw 315°
  */
-PARAM_DEFINE_INT32(SENS_EN_TFM8_OR, 0);
+PARAM_DEFINE_INT32(SENS_TFM_8_ORT, 0);
 
 /**
  * TFmini Plus I2C Sensor 9 Rotation
@@ -252,7 +252,7 @@ PARAM_DEFINE_INT32(SENS_EN_TFM8_OR, 0);
  * @value 6 Yaw 270°
  * @value 7 Yaw 315°
  */
-PARAM_DEFINE_INT32(SENS_EN_TFM9_OR, 0);
+PARAM_DEFINE_INT32(SENS_TFM_9_ORT, 0);
 
 /**
  * TFmini Plus I2C Sensor 10 Rotation
@@ -273,7 +273,7 @@ PARAM_DEFINE_INT32(SENS_EN_TFM9_OR, 0);
  * @value 6 Yaw 270°
  * @value 7 Yaw 315°
  */
-PARAM_DEFINE_INT32(SENS_EN_TFM10_OR, 0);
+PARAM_DEFINE_INT32(SENS_TFM_10_ORT, 0);
 
 /**
  * TFmini Plus I2C Sensor 12 Rotation
@@ -294,4 +294,4 @@ PARAM_DEFINE_INT32(SENS_EN_TFM10_OR, 0);
  * @value 6 Yaw 270°
  * @value 7 Yaw 315°
  */
-PARAM_DEFINE_INT32(SENS_EN_TFM11_OR, 0);
+PARAM_DEFINE_INT32(SENS_TFM_11_ORT, 0);

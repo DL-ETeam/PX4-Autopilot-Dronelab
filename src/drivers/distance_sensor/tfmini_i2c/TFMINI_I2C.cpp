@@ -70,12 +70,12 @@
 #define TFMINII2C_BASE_ADDR 0x10
 
 
-int TFMINII2C::print_status()
+void TFMINII2C::print_status()
 {
 	PX4_INFO("Running");
 	// TODO: print additional runtime information about the state of the module
 
-	return 0;
+	
 }
 
 int TFMINII2C::custom_command(int argc, char *argv[])
@@ -96,72 +96,27 @@ int TFMINII2C::custom_command(int argc, char *argv[])
 	return print_usage("unknown command");
 }
 
-int TFMINII2C::task_spawn(int argc, char *argv[])
-{
-	_task_id = px4_task_spawn_cmd("module",
-				      SCHED_DEFAULT,
-				      SCHED_PRIORITY_DEFAULT,
-				      1024,
-				      (px4_main_t)&run_trampoline,
-				      (char *const *)argv);
 
-	if (_task_id < 0) {
-		_task_id = -1;
-		return -errno;
-	}
-
-	return 0;
+TFMINII2C::TFMINII2C(const I2CSPIDriverConfig &config) :
+	I2C(config),
+	ModuleParams(nullptr),
+	I2CSPIDriver(config)
+{  // lightware laser serial aur i2c mein bhi aisa hi kuch kiya hai
+	set_device_type(DRV_DIST_DEVTYPE_TFMINI);
 }
 
-TFMINII2C *TFMINII2C::instantiate(int argc, char *argv[])
+TFMINII2C::~TFMINII2C()
 {
-	int example_param = 0;
-	bool example_flag = false;
-	bool error_flag = false;
-
-	int myoptind = 1;
-	int ch;
-	const char *myoptarg = nullptr;
-
-	// parse CLI arguments
-	while ((ch = px4_getopt(argc, argv, "p:f", &myoptind, &myoptarg)) != EOF) {
-		switch (ch) {
-		case 'p':
-			example_param = (int)strtol(myoptarg, nullptr, 10);
-			break;
-
-		case 'f':
-			example_flag = true;
-			break;
-
-		case '?':
-			error_flag = true;
-			break;
-
-		default:
-			PX4_WARN("unrecognized flag");
-			error_flag = true;
-			break;
-		}
+	// Unadvertise the distance sensor topic.
+	if (_distance_sensor_topic != nullptr) {
+		orb_unadvertise(_distance_sensor_topic);
 	}
 
-	if (error_flag) {
-		return nullptr;
-	}
-
-	TFMINII2C *instance = new TFMINII2C(example_param, example_flag);
-
-	if (instance == nullptr) {
-		PX4_ERR("alloc failed");
-	}
-
-	return instance;
+	// Free perf counters.
+	perf_free(_comms_error);
+	perf_free(_sample_perf);
 }
 
-TFMINII2C::TFMINII2C(int example_param, bool example_flag)
-	: ModuleParams(nullptr)
-{
-}
 
 void TFMINII2C::run()
 {

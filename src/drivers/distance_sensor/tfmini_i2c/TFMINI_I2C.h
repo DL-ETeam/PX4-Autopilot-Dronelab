@@ -39,17 +39,22 @@
 #include <uORB/SubscriptionInterval.hpp>
 #include <uORB/topics/parameter_update.h>
 
+#include <px4_platform_common/i2c_spi_buses.h>
+#include <drivers/device/device.h>
+#include <drivers/device/i2c.h>
+
 using namespace time_literals;
 
 extern "C" __EXPORT int tfmini_i2c_main(int argc, char *argv[]);
 
-
-class TFMINII2C : public ModuleBase<TFMINII2C>, public ModuleParams
+// neeche ModuleBase ki jagah shayad I2CSPIDriver hi lagana hai, magar dekh
+// lena ek baar
+class TFMINII2C : public device::I2C, public ModuleParams, public I2CSPIDriver<TFMINII2C>
 {
 public:
-	TFMINII2C(int example_param, bool example_flag);
+	TFMINII2C(const I2CSPIDriverConfig &config);
 
-	virtual ~TFMINII2C() = default;
+	virtual ~TFMINII2C();
 
 	/** @see ModuleBase */
 	static int task_spawn(int argc, char *argv[]);
@@ -64,12 +69,18 @@ public:
 	static int print_usage(const char *reason = nullptr);
 
 	/** @see ModuleBase::run() */
-	void run() override;
+	void run();
 
 	/** @see ModuleBase::print_status() */
-	int print_status() override;
+	void print_status() override;
 
 private:
+
+
+	/**
+	 * Gets the current sensor rotation value.
+	 */
+	int get_sensor_rotation(const size_t index);
 
 	/**
 	 * Check for parameter changes and update them if needed.
@@ -78,21 +89,26 @@ private:
 	 */
 	void parameters_update(bool force = false);
 
+	orb_advert_t _distance_sensor_topic{nullptr};
+
+	perf_counter_t _comms_error{perf_alloc(PC_ELAPSED, "tfminii2c_comms_error")};
+	perf_counter_t _sample_perf{perf_alloc(PC_COUNT, "tfminii2c_sample_perf")};
+
 
 	DEFINE_PARAMETERS(
 		(ParamInt<px4::params::SENS_EN_TFMI2C>)   _p_sensor_enabled,
-		(ParamInt<px4::params::SENS_EN_TFM0_OR>)  _p_sensor0_rot,
-		(ParamInt<px4::params::SENS_EN_TFM1_OR>)  _p_sensor1_rot,
-		(ParamInt<px4::params::SENS_EN_TFM2_OR>)  _p_sensor2_rot,
-		(ParamInt<px4::params::SENS_EN_TFM3_OR>)  _p_sensor3_rot,
-		(ParamInt<px4::params::SENS_EN_TFM4_OR>)  _p_sensor4_rot,
-		(ParamInt<px4::params::SENS_EN_TFM5_OR>)  _p_sensor5_rot,
-		(ParamInt<px4::params::SENS_EN_TFM6_OR>)  _p_sensor6_rot,
-		(ParamInt<px4::params::SENS_EN_TFM7_OR>)  _p_sensor7_rot,
-		(ParamInt<px4::params::SENS_EN_TFM8_OR>)  _p_sensor8_rot,
-		(ParamInt<px4::params::SENS_EN_TFM9_OR>)  _p_sensor9_rot,
-		(ParamInt<px4::params::SENS_EN_TFM10_OR>) _p_sensor10_rot,
-		(ParamInt<px4::params::SENS_EN_TFM11_OR>) _p_sensor11_rot
+		(ParamInt<px4::params::SENS_TFM_0_ORT>)  _p_sensor0_rot,
+		(ParamInt<px4::params::SENS_TFM_1_ORT>)  _p_sensor1_rot,
+		(ParamInt<px4::params::SENS_TFM_2_ORT>)  _p_sensor2_rot,
+		(ParamInt<px4::params::SENS_TFM_3_ORT>)  _p_sensor3_rot,
+		(ParamInt<px4::params::SENS_TFM_4_ORT>)  _p_sensor4_rot,
+		(ParamInt<px4::params::SENS_TFM_5_ORT>)  _p_sensor5_rot,
+		(ParamInt<px4::params::SENS_TFM_6_ORT>)  _p_sensor6_rot,
+		(ParamInt<px4::params::SENS_TFM_7_ORT>)  _p_sensor7_rot,
+		(ParamInt<px4::params::SENS_TFM_8_ORT>)  _p_sensor8_rot,
+		(ParamInt<px4::params::SENS_TFM_9_ORT>)  _p_sensor9_rot,
+		(ParamInt<px4::params::SENS_TFM_10_ORT>) _p_sensor10_rot,
+		(ParamInt<px4::params::SENS_TFM_11_ORT>) _p_sensor11_rot
 	);
 
 	// Subscriptions

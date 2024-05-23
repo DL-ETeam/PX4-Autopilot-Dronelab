@@ -42,6 +42,8 @@
 #include <px4_platform_common/i2c_spi_buses.h>
 #include <drivers/device/device.h>
 #include <drivers/device/i2c.h>
+#include <containers/Array.hpp>
+#include <uORB/topics/distance_sensor.h>
 
 using namespace time_literals;
 
@@ -56,26 +58,37 @@ public:
 
 	virtual ~TFMINII2C();
 
-	/** @see ModuleBase */
-	static int task_spawn(int argc, char *argv[]);
+
+	/**
+	 * Initializes the sensors, advertises uORB topic,
+	 * sets device addresses
+	 */
+	virtual int init() override;
 
 	/** @see ModuleBase */
-	static TFMINII2C *instantiate(int argc, char *argv[]);
+	static void print_usage();
 
-	/** @see ModuleBase */
-	static int custom_command(int argc, char *argv[]);
-
-	/** @see ModuleBase */
-	static int print_usage(const char *reason = nullptr);
-
-	/** @see ModuleBase::run() */
-	void run();
 
 	/** @see ModuleBase::print_status() */
 	void print_status() override;
 
+	/**
+	 * Initializes the automatic measurement state machine and starts the driver.
+	 */
+	void start();
+
+	/**
+	 * Perform a poll cycle; collect from the previous measurement
+	 * and start a new one.
+	 */
+	void RunImpl();
+
 private:
 
+	/**
+	 * Collects the most recent sensor measurement data from the i2c bus.
+	 */
+	int collect();
 
 	/**
 	 * Gets the current sensor rotation value.
@@ -88,6 +101,13 @@ private:
 	 * @param force for a parameter update
 	 */
 	void parameters_update(bool force = false);
+
+	static constexpr int RANGE_FINDER_MAX_SENSORS = 12;
+
+	px4::Array<uint8_t, RANGE_FINDER_MAX_SENSORS> _sensor_addresses {};
+	px4::Array<uint8_t, RANGE_FINDER_MAX_SENSORS> _sensor_rotations {};
+
+	int _sensor_count{0};
 
 	orb_advert_t _distance_sensor_topic{nullptr};
 

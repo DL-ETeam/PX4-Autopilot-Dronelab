@@ -32,9 +32,6 @@
  ****************************************************************************/
 
 
-// yaad rakhna, uorb alag alag honge alag alag sensors ke liye, multiple ko 
-// implement karne mein yaad rahe
-
 // plan yeh hai, ek main parameter yeh dekhne ke liye ki kitne sensors hain.
 // Uske baad har ek ke liye naya parameter jo ek list mein se orientation
 // select karega. Asaan hoga ki har ek sensor ke liye pitch angle aur yaw angle
@@ -66,11 +63,22 @@
 #include <px4_platform_common/log.h>
 #include <px4_platform_common/posix.h>
 #include <uORB/topics/sensor_combined.h>
+#include <uORB/topics/distance_sensor.h>
 
-#define TFMINII2C_BASE_ADDR 0x10
 
+#define TFMINII2C_BASE_ADDR 0x7F
+#define TFMINII2C_MIN_ADDR 0x01
 
-void TFMINII2C::print_status()
+#define TFMINII2C_MIN_DISTANCE 0.04f // min should be 3 but is taken as 0.4m, due to EKF
+#define TFMINII2C_MAX_DISTANCE 12.0f // issues
+
+#define TFMINII2C_BUS_SPEED 100 // (100 ms) kuch bhi...
+
+#define RANGE_FINDER_MAX_SENSORS 12
+#define TFMINII2C_INTERVAL_BETWEEN_SUCCESSIVE_FIRES 150 // (150 ms) minimum is 100 ms
+
+void
+TFMINII2C::print_status()
 {
 	PX4_INFO("Running");
 	// TODO: print additional runtime information about the state of the module
@@ -78,22 +86,11 @@ void TFMINII2C::print_status()
 	
 }
 
-int TFMINII2C::custom_command(int argc, char *argv[])
+void
+TFMINII2C::start()
 {
-	/*
-	if (!is_running()) {
-		print_usage("not running");
-		return 1;
-	}
-
-	// additional custom commands can be handled like this:
-	if (!strcmp(argv[0], "do-something")) {
-		get_instance()->do_something();
-		return 0;
-	}
-	 */
-
-	return print_usage("unknown command");
+	// schedule a cycle to start things (the sensor sends at 100Hz, but we run a bit faster to avoid missing data)
+	ScheduleOnInterval(7_ms);
 }
 
 
@@ -117,48 +114,138 @@ TFMINII2C::~TFMINII2C()
 	perf_free(_sample_perf);
 }
 
-
-void TFMINII2C::run()
+int
+TFMINII2C::get_sensor_rotation(const size_t index)
 {
-	// Example: run the loop synchronized to the sensor_combined topic publication
-	int sensor_combined_sub = orb_subscribe(ORB_ID(sensor_combined));
+	switch (index) {
+	case 0: return _p_sensor0_rot.get();
 
-	px4_pollfd_struct_t fds[1];
-	fds[0].fd = sensor_combined_sub;
-	fds[0].events = POLLIN;
+	case 1: return _p_sensor1_rot.get();
 
-	// initialize parameters
-	parameters_update(true);
+	case 2: return _p_sensor2_rot.get();
 
-	while (!should_exit()) {
+	case 3: return _p_sensor3_rot.get();
 
-		// wait for up to 1000ms for data
-		int pret = px4_poll(fds, (sizeof(fds) / sizeof(fds[0])), 1000);
+	case 4: return _p_sensor4_rot.get();
 
-		if (pret == 0) {
-			// Timeout: let the loop run anyway, don't do `continue` here
+	case 5: return _p_sensor5_rot.get();
 
-		} else if (pret < 0) {
-			// this is undesirable but not much we can do
-			PX4_ERR("poll error %d, %d", pret, errno);
-			px4_usleep(50000);
-			continue;
+	case 6: return _p_sensor6_rot.get();
 
-		} else if (fds[0].revents & POLLIN) {
+	case 7: return _p_sensor7_rot.get();
 
-			struct sensor_combined_s sensor_combined;
-			orb_copy(ORB_ID(sensor_combined), sensor_combined_sub, &sensor_combined);
-			// TODO: do something with the data...
+	case 8: return _p_sensor8_rot.get();
 
-		}
+	case 9: return _p_sensor9_rot.get();
 
-		parameters_update();
+	case 10: return _p_sensor10_rot.get();
+
+	case 11: return _p_sensor11_rot.get();
+
+	default: return PX4_ERROR;
 	}
-
-	orb_unsubscribe(sensor_combined_sub);
 }
 
-void TFMINII2C::parameters_update(bool force)
+int
+TFMINII2C::init()
+{	
+	if (_p_sensor_enabled.get() == 0) {
+		PX4_WARN("disabled");
+		return PX4_ERROR;
+	}
+
+	// Initialize the I2C device
+	if (I2C::init() != OK) {
+		return PX4_ERROR;
+	}
+
+	for (int i = 0; i <= RANGE_FINDER_MAX_SENSORS; i++) {
+		set_device_address(TFMINII2C_BASE_ADDR + i);
+
+		// Check if a sensor is present.
+		if (probe() != PX4_OK) {
+			break;
+		}
+
+		// Store I2C address
+		_sensor_addresses[i] = TFMINII2C_BASE_ADDR + i;
+		_sensor_rotations[i] = get_sensor_rotation(i);
+		_sensor_count++;
+
+		// Configure the sensor
+		
+		
+
+
+		
+		PX4_INFO("sensor %i at address 0x%02X added", i, get_device_address());
+	}
+
+
+	// Return an error if no sensors were detected.
+	if (_sensor_count == 0) {
+		PX4_ERR("no sensors discovered");
+		return PX4_ERROR;
+	}
+
+
+
+	PX4_INFO("Total sensors connected: %i", _sensor_count);
+	start();
+	return PX4_OK;
+
+	
+}
+
+int
+TFMINII2C::collect()
+{	// yaad rakhna, uorb alag alag honge alag alag sensors ke liye, 
+	//  multiple ko implement karne mein yaad rahe
+	uint8_t val[2] = {};
+	perf_begin(_sample_perf);
+
+	// Increment the sensor index, (limited to the number of sensors connected).
+	for (int index = 0; index < _sensor_count; index++) {
+
+		// Set address of the current sensor to collect data from.
+		set_device_address(_sensor_addresses[index]);
+
+		// Transfer data from the bus.
+		int ret_val = transfer(nullptr, 0, &val[0], 2);
+
+		if (ret_val < 0) {
+			PX4_ERR("sensor %i read failed, address: 0x%02X", index, _sensor_addresses[index]);
+			perf_count(_comms_error);
+			perf_end(_sample_perf);
+			return ret_val;
+		}
+
+		uint16_t distance_mm = uint16_t(val[0]) << 8 | val[1];
+		float distance_m = static_cast<float>(distance_mm) / 1000.f;
+
+		distance_sensor_s report {};
+		report.current_distance = distance_m;
+		report.device_id        = get_device_id();
+		report.max_distance     = TFMINII2C_MAX_DISTANCE;
+		report.min_distance     = TFMINII2C_MIN_DISTANCE;
+		report.orientation      = _sensor_rotations[index];
+		report.signal_quality   = -1;
+		report.timestamp        = hrt_absolute_time();
+		report.type             = distance_sensor_s::MAV_DISTANCE_SENSOR_LASER;
+		report.variance         = 0;
+
+		int instance_id;
+		orb_publish_auto(ORB_ID(distance_sensor), &_distance_sensor_topic, &report, &instance_id);
+	}
+
+	perf_end(_sample_perf);
+	return PX4_OK;
+}
+
+
+
+void
+TFMINII2C::parameters_update(bool force)
 {
 	// check for parameter updates
 	if (_parameter_update_sub.updated() || force) {
@@ -171,11 +258,10 @@ void TFMINII2C::parameters_update(bool force)
 	}
 }
 
-int TFMINII2C::print_usage(const char *reason)
+void
+TFMINII2C::print_usage()
 {
-	if (reason) {
-		PX4_WARN("%s\n", reason);
-	}
+	
 
 	PRINT_MODULE_DESCRIPTION(
 		R"DESCR_STR(
@@ -199,10 +285,54 @@ $ module start -f -p 42
 	PRINT_MODULE_USAGE_PARAM_INT('p', 0, 0, 1000, "Optional example parameter", true);
 	PRINT_MODULE_USAGE_DEFAULT_COMMANDS();
 
-	return 0;
 }
 
-int tfmini_i2c_main(int argc, char *argv[])
+void
+TFMINII2C::RunImpl()
 {
-	return TFMINII2C::main(argc, argv);
+	// Collect the sensor data.
+	if (collect() != PX4_OK) {
+		PX4_INFO("collection error");
+		// If an error occurred, restart the measurement state machine.
+		start();
+		return;
+	}
+}
+
+int
+tfmini_i2c_main(int argc, char *argv[])
+{
+	using ThisDriver = TFMINII2C;
+	BusCLIArguments cli{true, false};
+	cli.default_i2c_frequency = TFMINII2C_BUS_SPEED;
+
+	const char *verb = cli.parseDefaultArguments(argc, argv);
+
+	if (!verb) {
+		ThisDriver::print_usage();
+		return -1;
+	}
+
+	cli.i2c_address = TFMINII2C_BASE_ADDR;
+
+	BusInstanceIterator iterator(MODULE_NAME, cli, DRV_DIST_DEVTYPE_TFMINI);
+
+	if (!strcmp(verb, "start")) {
+		return ThisDriver::module_start(cli, iterator);
+	}
+
+	if (!strcmp(verb, "stop")) {
+		return ThisDriver::module_stop(iterator);
+	}
+
+	if (!strcmp(verb, "status")) {
+		return ThisDriver::module_status(iterator);
+	}
+
+	if (!strcmp(verb, "set_address")) {
+		return ThisDriver::module_custom_method(cli, iterator);
+	}
+
+	ThisDriver::print_usage();
+	return -1;
 }

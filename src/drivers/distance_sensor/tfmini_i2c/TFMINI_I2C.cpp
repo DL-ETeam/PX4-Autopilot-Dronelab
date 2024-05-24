@@ -89,6 +89,9 @@ TFMINII2C::print_status()
 void
 TFMINII2C::start()
 {
+	// Fetch parameter values.
+	ModuleParams::updateParams();
+
 	// schedule a cycle to start things (the sensor sends at 100Hz, but we run a bit faster to avoid missing data)
 	ScheduleOnInterval(7_ms);
 }
@@ -110,7 +113,7 @@ TFMINII2C::~TFMINII2C()
 	}
 
 	// Free perf counters.
-	perf_free(_comms_error);
+	perf_free(_comms_errors);
 	perf_free(_sample_perf);
 }
 
@@ -215,7 +218,7 @@ TFMINII2C::collect()
 
 		if (ret_val < 0) {
 			PX4_ERR("sensor %i read failed, address: 0x%02X", index, _sensor_addresses[index]);
-			perf_count(_comms_error);
+			perf_count( _comms_errors);
 			perf_end(_sample_perf);
 			return ret_val;
 		}
@@ -263,26 +266,10 @@ TFMINII2C::print_usage()
 {
 	
 
-	PRINT_MODULE_DESCRIPTION(
-		R"DESCR_STR(
-### Description
-Section that describes the provided module functionality.
-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-This is a template for a module running as a task in the background with start/stop/status functionality.
-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-### Implementation
-Section describing the high-level implementation of this module.
-
-### Examples
-CLI usage example:
-$ module start -f -p 42
-
-)DESCR_STR");
-
-	PRINT_MODULE_USAGE_NAME("module", "AAAAAAAA");
+	PRINT_MODULE_USAGE_NAME("Benewake Tfmini Plus I2C", "driver");
+	PRINT_MODULE_USAGE_SUBCATEGORY("distance_sensor");
 	PRINT_MODULE_USAGE_COMMAND("start");
-	PRINT_MODULE_USAGE_PARAM_FLAG('f', "Optional example flag", true);
-	PRINT_MODULE_USAGE_PARAM_INT('p', 0, 0, 1000, "Optional example parameter", true);
+	PRINT_MODULE_USAGE_PARAMS_I2C_SPI_DRIVER(true, false);
 	PRINT_MODULE_USAGE_DEFAULT_COMMANDS();
 
 }
@@ -302,20 +289,27 @@ TFMINII2C::RunImpl()
 int
 tfmini_i2c_main(int argc, char *argv[])
 {
+	int ch;
 	using ThisDriver = TFMINII2C;
 	BusCLIArguments cli{true, false};
 	cli.default_i2c_frequency = TFMINII2C_BUS_SPEED;
 
-	const char *verb = cli.parseDefaultArguments(argc, argv);
+	while ((ch = cli.getOpt(argc, argv, "R:")) != EOF) {
+		switch (ch) {
+		case 'R':
+			cli.rotation = (Rotation)atoi(cli.optArg());
+			break;
+		}
+	}
+
+	const char *verb = cli.optArg();
 
 	if (!verb) {
 		ThisDriver::print_usage();
 		return -1;
 	}
 
-	cli.i2c_address = TFMINII2C_BASE_ADDR;
-
-	BusInstanceIterator iterator(MODULE_NAME, cli, DRV_DIST_DEVTYPE_TFMINI);
+	BusInstanceIterator iterator(MODULE_NAME, cli, DRV_DIST_DEVTYPE_TF02PRO);
 
 	if (!strcmp(verb, "start")) {
 		return ThisDriver::module_start(cli, iterator);
@@ -327,10 +321,6 @@ tfmini_i2c_main(int argc, char *argv[])
 
 	if (!strcmp(verb, "status")) {
 		return ThisDriver::module_status(iterator);
-	}
-
-	if (!strcmp(verb, "set_address")) {
-		return ThisDriver::module_custom_method(cli, iterator);
 	}
 
 	ThisDriver::print_usage();

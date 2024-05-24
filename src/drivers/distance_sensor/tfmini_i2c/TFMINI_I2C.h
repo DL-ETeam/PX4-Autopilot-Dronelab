@@ -90,6 +90,8 @@ private:
 	 */
 	int collect();
 
+	int measure();
+
 	/**
 	 * Gets the current sensor rotation value.
 	 */
@@ -102,6 +104,8 @@ private:
 	 */
 	void parameters_update(bool force = false);
 
+	bool _collect_phase{false};
+
 	static constexpr int RANGE_FINDER_MAX_SENSORS = 12;
 
 	px4::Array<uint8_t, RANGE_FINDER_MAX_SENSORS> _sensor_addresses {};
@@ -111,7 +115,7 @@ private:
 
 	orb_advert_t _distance_sensor_topic{nullptr};
 
-	perf_counter_t _comms_error{perf_alloc(PC_ELAPSED, "tfminii2c_comms_error")};
+	perf_counter_t  _comms_errors{perf_alloc(PC_ELAPSED, "tfminii2c_comms_error")};
 	perf_counter_t _sample_perf{perf_alloc(PC_COUNT, "tfminii2c_sample_perf")};
 
 

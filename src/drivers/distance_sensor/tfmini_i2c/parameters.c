@@ -51,17 +51,36 @@ PARAM_DEFINE_INT32(SENS_EN_TFMI2C, 0);
  *
  * @reboot_required true
  * @min 0
- * @max 7
+ * @max 25
  * @group Sensors
  *
- * @value 0 No rotation
- * @value 1 Yaw 45°
- * @value 2 Yaw 90°
- * @value 3 Yaw 135°
- * @value 4 Yaw 180°
- * @value 5 Yaw 225°
- * @value 6 Yaw 270°
- * @value 7 Yaw 315°
+ * 
+ *@value   0 No rotation
+ *@value   1 Yaw 45°
+ *@value   2 Yaw 90°
+ *@value   3 Yaw 135°
+ *@value   4 Yaw 180°
+ *@value   5 Yaw 225°
+ *@value   6 Yaw 270°
+ *@value   7 Yaw 315°
+ *@value   8 Roll 180°
+ *@value   9 Roll 180°, Yaw 45°
+ *@value   10 Roll 180°, Yaw 90°
+ *@value   11 Roll 180°, Yaw 135°
+ *@value   12 Pitch 180°
+ *@value   13 Roll 180°, Yaw 225°
+ *@value   14 Roll 180°, Yaw 270°
+ *@value   15 Roll 180°, Yaw 315°
+ *@value   16 Roll 90°
+ *@value   17 Roll 90°, Yaw 45°
+ *@value   18 Roll 90°, Yaw 90°
+ *@value   19 Roll 90°, Yaw 135°
+ *@value   20 Roll 270°
+ *@value   21 Roll 270°, Yaw 45°
+ *@value   22 Roll 270°, Yaw 90°
+ *@value   23 Roll 270°, Yaw 135°
+ *@value   24 Pitch 90°
+ *@value   25 Pitch 270°
  */
 PARAM_DEFINE_INT32(SENS_TFM_0_ORT, 0);
 
@@ -72,17 +91,36 @@ PARAM_DEFINE_INT32(SENS_TFM_0_ORT, 0);
  *
  * @reboot_required true
  * @min 0
- * @max 7
+ * @max 25
  * @group Sensors
  *
- * @value 0 No rotation
- * @value 1 Yaw 45°
- * @value 2 Yaw 90°
- * @value 3 Yaw 135°
- * @value 4 Yaw 180°
- * @value 5 Yaw 225°
- * @value 6 Yaw 270°
- * @value 7 Yaw 315°
+ * 
+ *@value   0 No rotation
+ *@value   1 Yaw 45°
+ *@value   2 Yaw 90°
+ *@value   3 Yaw 135°
+ *@value   4 Yaw 180°
+ *@value   5 Yaw 225°
+ *@value   6 Yaw 270°
+ *@value   7 Yaw 315°
+ *@value   8 Roll 180°
+ *@value   9 Roll 180°, Yaw 45°
+ *@value   10 Roll 180°, Yaw 90°
+ *@value   11 Roll 180°, Yaw 135°
+ *@value   12 Pitch 180°
+ *@value   13 Roll 180°, Yaw 225°
+ *@value   14 Roll 180°, Yaw 270°
+ *@value   15 Roll 180°, Yaw 315°
+ *@value   16 Roll 90°
+ *@value   17 Roll 90°, Yaw 45°
+ *@value   18 Roll 90°, Yaw 90°
+ *@value   19 Roll 90°, Yaw 135°
+ *@value   20 Roll 270°
+ *@value   21 Roll 270°, Yaw 45°
+ *@value   22 Roll 270°, Yaw 90°
+ *@value   23 Roll 270°, Yaw 135°
+ *@value   24 Pitch 90°
+ *@value   25 Pitch 270°
  */
 PARAM_DEFINE_INT32(SENS_TFM_1_ORT, 0);
 
@@ -93,17 +131,36 @@ PARAM_DEFINE_INT32(SENS_TFM_1_ORT, 0);
  *
  * @reboot_required true
  * @min 0
- * @max 7
+ * @max 25
  * @group Sensors
  *
- * @value 0 No rotation
- * @value 1 Yaw 45°
- * @value 2 Yaw 90°
- * @value 3 Yaw 135°
- * @value 4 Yaw 180°
- * @value 5 Yaw 225°
- * @value 6 Yaw 270°
- * @value 7 Yaw 315°
+ * 
+ *@value   0 No rotation
+ *@value   1 Yaw 45°
+ *@value   2 Yaw 90°
+ *@value   3 Yaw 135°
+ *@value   4 Yaw 180°
+ *@value   5 Yaw 225°
+ *@value   6 Yaw 270°
+ *@value   7 Yaw 315°
+ *@value   8 Roll 180°
+ *@value   9 Roll 180°, Yaw 45°
+ *@value   10 Roll 180°, Yaw 90°
+ *@value   11 Roll 180°, Yaw 135°
+ *@value   12 Pitch 180°
+ *@value   13 Roll 180°, Yaw 225°
+ *@value   14 Roll 180°, Yaw 270°
+ *@value   15 Roll 180°, Yaw 315°
+ *@value   16 Roll 90°
+ *@value   17 Roll 90°, Yaw 45°
+ *@value   18 Roll 90°, Yaw 90°
+ *@value   19 Roll 90°, Yaw 135°
+ *@value   20 Roll 270°
+ *@value   21 Roll 270°, Yaw 45°
+ *@value   22 Roll 270°, Yaw 90°
+ *@value   23 Roll 270°, Yaw 135°
+ *@value   24 Pitch 90°
+ *@value   25 Pitch 270°
  */
 PARAM_DEFINE_INT32(SENS_TFM_2_ORT, 0);
 
@@ -114,17 +171,36 @@ PARAM_DEFINE_INT32(SENS_TFM_2_ORT, 0);
  *
  * @reboot_required true
  * @min 0
- * @max 7
+ * @max 25
  * @group Sensors
  *
- * @value 0 No rotation
- * @value 1 Yaw 45°
- * @value 2 Yaw 90°
- * @value 3 Yaw 135°
- * @value 4 Yaw 180°
- * @value 5 Yaw 225°
- * @value 6 Yaw 270°
- * @value 7 Yaw 315°
+ * 
+ *@value   0 No rotation
+ *@value   1 Yaw 45°
+ *@value   2 Yaw 90°
+ *@value   3 Yaw 135°
+ *@value   4 Yaw 180°
+ *@value   5 Yaw 225°
+ *@value   6 Yaw 270°
+ *@value   7 Yaw 315°
+ *@value   8 Roll 180°
+ *@value   9 Roll 180°, Yaw 45°
+ *@value   10 Roll 180°, Yaw 90°
+ *@value   11 Roll 180°, Yaw 135°
+ *@value   12 Pitch 180°
+ *@value   13 Roll 180°, Yaw 225°
+ *@value   14 Roll 180°, Yaw 270°
+ *@value   15 Roll 180°, Yaw 315°
+ *@value   16 Roll 90°
+ *@value   17 Roll 90°, Yaw 45°
+ *@value   18 Roll 90°, Yaw 90°
+ *@value   19 Roll 90°, Yaw 135°
+ *@value   20 Roll 270°
+ *@value   21 Roll 270°, Yaw 45°
+ *@value   22 Roll 270°, Yaw 90°
+ *@value   23 Roll 270°, Yaw 135°
+ *@value   24 Pitch 90°
+ *@value   25 Pitch 270°
  */
 PARAM_DEFINE_INT32(SENS_TFM_3_ORT, 0);
 
@@ -135,17 +211,36 @@ PARAM_DEFINE_INT32(SENS_TFM_3_ORT, 0);
  *
  * @reboot_required true
  * @min 0
- * @max 7
+ * @max 25
  * @group Sensors
  *
- * @value 0 No rotation
- * @value 1 Yaw 45°
- * @value 2 Yaw 90°
- * @value 3 Yaw 135°
- * @value 4 Yaw 180°
- * @value 5 Yaw 225°
- * @value 6 Yaw 270°
- * @value 7 Yaw 315°
+ * 
+ *@value   0 No rotation
+ *@value   1 Yaw 45°
+ *@value   2 Yaw 90°
+ *@value   3 Yaw 135°
+ *@value   4 Yaw 180°
+ *@value   5 Yaw 225°
+ *@value   6 Yaw 270°
+ *@value   7 Yaw 315°
+ *@value   8 Roll 180°
+ *@value   9 Roll 180°, Yaw 45°
+ *@value   10 Roll 180°, Yaw 90°
+ *@value   11 Roll 180°, Yaw 135°
+ *@value   12 Pitch 180°
+ *@value   13 Roll 180°, Yaw 225°
+ *@value   14 Roll 180°, Yaw 270°
+ *@value   15 Roll 180°, Yaw 315°
+ *@value   16 Roll 90°
+ *@value   17 Roll 90°, Yaw 45°
+ *@value   18 Roll 90°, Yaw 90°
+ *@value   19 Roll 90°, Yaw 135°
+ *@value   20 Roll 270°
+ *@value   21 Roll 270°, Yaw 45°
+ *@value   22 Roll 270°, Yaw 90°
+ *@value   23 Roll 270°, Yaw 135°
+ *@value   24 Pitch 90°
+ *@value   25 Pitch 270°
  */
 PARAM_DEFINE_INT32(SENS_TFM_4_ORT, 0);
 
@@ -156,17 +251,36 @@ PARAM_DEFINE_INT32(SENS_TFM_4_ORT, 0);
  *
  * @reboot_required true
  * @min 0
- * @max 7
+ * @max 25
  * @group Sensors
  *
- * @value 0 No rotation
- * @value 1 Yaw 45°
- * @value 2 Yaw 90°
- * @value 3 Yaw 135°
- * @value 4 Yaw 180°
- * @value 5 Yaw 225°
- * @value 6 Yaw 270°
- * @value 7 Yaw 315°
+ * 
+ *@value   0 No rotation
+ *@value   1 Yaw 45°
+ *@value   2 Yaw 90°
+ *@value   3 Yaw 135°
+ *@value   4 Yaw 180°
+ *@value   5 Yaw 225°
+ *@value   6 Yaw 270°
+ *@value   7 Yaw 315°
+ *@value   8 Roll 180°
+ *@value   9 Roll 180°, Yaw 45°
+ *@value   10 Roll 180°, Yaw 90°
+ *@value   11 Roll 180°, Yaw 135°
+ *@value   12 Pitch 180°
+ *@value   13 Roll 180°, Yaw 225°
+ *@value   14 Roll 180°, Yaw 270°
+ *@value   15 Roll 180°, Yaw 315°
+ *@value   16 Roll 90°
+ *@value   17 Roll 90°, Yaw 45°
+ *@value   18 Roll 90°, Yaw 90°
+ *@value   19 Roll 90°, Yaw 135°
+ *@value   20 Roll 270°
+ *@value   21 Roll 270°, Yaw 45°
+ *@value   22 Roll 270°, Yaw 90°
+ *@value   23 Roll 270°, Yaw 135°
+ *@value   24 Pitch 90°
+ *@value   25 Pitch 270°
  */
 PARAM_DEFINE_INT32(SENS_TFM_5_ORT, 0);
 
@@ -177,17 +291,36 @@ PARAM_DEFINE_INT32(SENS_TFM_5_ORT, 0);
  *
  * @reboot_required true
  * @min 0
- * @max 7
+ * @max 25
  * @group Sensors
  *
- * @value 0 No rotation
- * @value 1 Yaw 45°
- * @value 2 Yaw 90°
- * @value 3 Yaw 135°
- * @value 4 Yaw 180°
- * @value 5 Yaw 225°
- * @value 6 Yaw 270°
- * @value 7 Yaw 315°
+ * 
+ *@value   0 No rotation
+ *@value   1 Yaw 45°
+ *@value   2 Yaw 90°
+ *@value   3 Yaw 135°
+ *@value   4 Yaw 180°
+ *@value   5 Yaw 225°
+ *@value   6 Yaw 270°
+ *@value   7 Yaw 315°
+ *@value   8 Roll 180°
+ *@value   9 Roll 180°, Yaw 45°
+ *@value   10 Roll 180°, Yaw 90°
+ *@value   11 Roll 180°, Yaw 135°
+ *@value   12 Pitch 180°
+ *@value   13 Roll 180°, Yaw 225°
+ *@value   14 Roll 180°, Yaw 270°
+ *@value   15 Roll 180°, Yaw 315°
+ *@value   16 Roll 90°
+ *@value   17 Roll 90°, Yaw 45°
+ *@value   18 Roll 90°, Yaw 90°
+ *@value   19 Roll 90°, Yaw 135°
+ *@value   20 Roll 270°
+ *@value   21 Roll 270°, Yaw 45°
+ *@value   22 Roll 270°, Yaw 90°
+ *@value   23 Roll 270°, Yaw 135°
+ *@value   24 Pitch 90°
+ *@value   25 Pitch 270°
  */
 PARAM_DEFINE_INT32(SENS_TFM_6_ORT, 0);
 
@@ -198,17 +331,36 @@ PARAM_DEFINE_INT32(SENS_TFM_6_ORT, 0);
  *
  * @reboot_required true
  * @min 0
- * @max 7
+ * @max 25
  * @group Sensors
  *
- * @value 0 No rotation
- * @value 1 Yaw 45°
- * @value 2 Yaw 90°
- * @value 3 Yaw 135°
- * @value 4 Yaw 180°
- * @value 5 Yaw 225°
- * @value 6 Yaw 270°
- * @value 7 Yaw 315°
+ * 
+ *@value   0 No rotation
+ *@value   1 Yaw 45°
+ *@value   2 Yaw 90°
+ *@value   3 Yaw 135°
+ *@value   4 Yaw 180°
+ *@value   5 Yaw 225°
+ *@value   6 Yaw 270°
+ *@value   7 Yaw 315°
+ *@value   8 Roll 180°
+ *@value   9 Roll 180°, Yaw 45°
+ *@value   10 Roll 180°, Yaw 90°
+ *@value   11 Roll 180°, Yaw 135°
+ *@value   12 Pitch 180°
+ *@value   13 Roll 180°, Yaw 225°
+ *@value   14 Roll 180°, Yaw 270°
+ *@value   15 Roll 180°, Yaw 315°
+ *@value   16 Roll 90°
+ *@value   17 Roll 90°, Yaw 45°
+ *@value   18 Roll 90°, Yaw 90°
+ *@value   19 Roll 90°, Yaw 135°
+ *@value   20 Roll 270°
+ *@value   21 Roll 270°, Yaw 45°
+ *@value   22 Roll 270°, Yaw 90°
+ *@value   23 Roll 270°, Yaw 135°
+ *@value   24 Pitch 90°
+ *@value   25 Pitch 270°
  */
 PARAM_DEFINE_INT32(SENS_TFM_7_ORT, 0);
 
@@ -219,17 +371,36 @@ PARAM_DEFINE_INT32(SENS_TFM_7_ORT, 0);
  *
  * @reboot_required true
  * @min 0
- * @max 7
+ * @max 25
  * @group Sensors
  *
- * @value 0 No rotation
- * @value 1 Yaw 45°
- * @value 2 Yaw 90°
- * @value 3 Yaw 135°
- * @value 4 Yaw 180°
- * @value 5 Yaw 225°
- * @value 6 Yaw 270°
- * @value 7 Yaw 315°
+ * 
+ *@value   0 No rotation
+ *@value   1 Yaw 45°
+ *@value   2 Yaw 90°
+ *@value   3 Yaw 135°
+ *@value   4 Yaw 180°
+ *@value   5 Yaw 225°
+ *@value   6 Yaw 270°
+ *@value   7 Yaw 315°
+ *@value   8 Roll 180°
+ *@value   9 Roll 180°, Yaw 45°
+ *@value   10 Roll 180°, Yaw 90°
+ *@value   11 Roll 180°, Yaw 135°
+ *@value   12 Pitch 180°
+ *@value   13 Roll 180°, Yaw 225°
+ *@value   14 Roll 180°, Yaw 270°
+ *@value   15 Roll 180°, Yaw 315°
+ *@value   16 Roll 90°
+ *@value   17 Roll 90°, Yaw 45°
+ *@value   18 Roll 90°, Yaw 90°
+ *@value   19 Roll 90°, Yaw 135°
+ *@value   20 Roll 270°
+ *@value   21 Roll 270°, Yaw 45°
+ *@value   22 Roll 270°, Yaw 90°
+ *@value   23 Roll 270°, Yaw 135°
+ *@value   24 Pitch 90°
+ *@value   25 Pitch 270°
  */
 PARAM_DEFINE_INT32(SENS_TFM_8_ORT, 0);
 
@@ -240,17 +411,36 @@ PARAM_DEFINE_INT32(SENS_TFM_8_ORT, 0);
  *
  * @reboot_required true
  * @min 0
- * @max 7
+ * @max 25
  * @group Sensors
  *
- * @value 0 No rotation
- * @value 1 Yaw 45°
- * @value 2 Yaw 90°
- * @value 3 Yaw 135°
- * @value 4 Yaw 180°
- * @value 5 Yaw 225°
- * @value 6 Yaw 270°
- * @value 7 Yaw 315°
+ * 
+ *@value   0 No rotation
+ *@value   1 Yaw 45°
+ *@value   2 Yaw 90°
+ *@value   3 Yaw 135°
+ *@value   4 Yaw 180°
+ *@value   5 Yaw 225°
+ *@value   6 Yaw 270°
+ *@value   7 Yaw 315°
+ *@value   8 Roll 180°
+ *@value   9 Roll 180°, Yaw 45°
+ *@value   10 Roll 180°, Yaw 90°
+ *@value   11 Roll 180°, Yaw 135°
+ *@value   12 Pitch 180°
+ *@value   13 Roll 180°, Yaw 225°
+ *@value   14 Roll 180°, Yaw 270°
+ *@value   15 Roll 180°, Yaw 315°
+ *@value   16 Roll 90°
+ *@value   17 Roll 90°, Yaw 45°
+ *@value   18 Roll 90°, Yaw 90°
+ *@value   19 Roll 90°, Yaw 135°
+ *@value   20 Roll 270°
+ *@value   21 Roll 270°, Yaw 45°
+ *@value   22 Roll 270°, Yaw 90°
+ *@value   23 Roll 270°, Yaw 135°
+ *@value   24 Pitch 90°
+ *@value   25 Pitch 270°
  */
 PARAM_DEFINE_INT32(SENS_TFM_9_ORT, 0);
 
@@ -261,37 +451,75 @@ PARAM_DEFINE_INT32(SENS_TFM_9_ORT, 0);
  *
  * @reboot_required true
  * @min 0
- * @max 7
+ * @max 25
  * @group Sensors
  *
- * @value 0 No rotation
- * @value 1 Yaw 45°
- * @value 2 Yaw 90°
- * @value 3 Yaw 135°
- * @value 4 Yaw 180°
- * @value 5 Yaw 225°
- * @value 6 Yaw 270°
- * @value 7 Yaw 315°
+ * 
+ *@value   0 No rotation
+ *@value   1 Yaw 45°
+ *@value   2 Yaw 90°
+ *@value   3 Yaw 135°
+ *@value   4 Yaw 180°
+ *@value   5 Yaw 225°
+ *@value   6 Yaw 270°
+ *@value   7 Yaw 315°
+ *@value   8 Roll 180°
+ *@value   9 Roll 180°, Yaw 45°
+ *@value   10 Roll 180°, Yaw 90°
+ *@value   11 Roll 180°, Yaw 135°
+ *@value   12 Pitch 180°
+ *@value   13 Roll 180°, Yaw 225°
+ *@value   14 Roll 180°, Yaw 270°
+ *@value   15 Roll 180°, Yaw 315°
+ *@value   16 Roll 90°
+ *@value   17 Roll 90°, Yaw 45°
+ *@value   18 Roll 90°, Yaw 90°
+ *@value   19 Roll 90°, Yaw 135°
+ *@value   20 Roll 270°
+ *@value   21 Roll 270°, Yaw 45°
+ *@value   22 Roll 270°, Yaw 90°
+ *@value   23 Roll 270°, Yaw 135°
+ *@value   24 Pitch 90°
+ *@value   25 Pitch 270°
  */
 PARAM_DEFINE_INT32(SENS_TFM_10_ORT, 0);
 
 /**
  * TFmini Plus I2C Sensor 12 Rotation
- *
+  *
  * This parameter defines the rotation of the TFmini Plus I2C sensor relative to the platform.
  *
  * @reboot_required true
  * @min 0
- * @max 7
+ * @max 25
  * @group Sensors
  *
- * @value 0 No rotation
- * @value 1 Yaw 45°
- * @value 2 Yaw 90°
- * @value 3 Yaw 135°
- * @value 4 Yaw 180°
- * @value 5 Yaw 225°
- * @value 6 Yaw 270°
- * @value 7 Yaw 315°
+ * 
+ *@value   0 No rotation
+ *@value   1 Yaw 45°
+ *@value   2 Yaw 90°
+ *@value   3 Yaw 135°
+ *@value   4 Yaw 180°
+ *@value   5 Yaw 225°
+ *@value   6 Yaw 270°
+ *@value   7 Yaw 315°
+ *@value   8 Roll 180°
+ *@value   9 Roll 180°, Yaw 45°
+ *@value   10 Roll 180°, Yaw 90°
+ *@value   11 Roll 180°, Yaw 135°
+ *@value   12 Pitch 180°
+ *@value   13 Roll 180°, Yaw 225°
+ *@value   14 Roll 180°, Yaw 270°
+ *@value   15 Roll 180°, Yaw 315°
+ *@value   16 Roll 90°
+ *@value   17 Roll 90°, Yaw 45°
+ *@value   18 Roll 90°, Yaw 90°
+ *@value   19 Roll 90°, Yaw 135°
+ *@value   20 Roll 270°
+ *@value   21 Roll 270°, Yaw 45°
+ *@value   22 Roll 270°, Yaw 90°
+ *@value   23 Roll 270°, Yaw 135°
+ *@value   24 Pitch 90°
+ *@value   25 Pitch 270°
  */
 PARAM_DEFINE_INT32(SENS_TFM_11_ORT, 0);

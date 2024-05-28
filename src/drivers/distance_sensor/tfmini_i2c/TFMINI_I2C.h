@@ -34,23 +34,43 @@
 #pragma once
 // yaad rakhna, uorb alag alag honge alag alag sensors ke liye, multiple ko implement karne
 // mein yaad rahe
+
 #include <px4_platform_common/module.h>
 #include <px4_platform_common/module_params.h>
 #include <uORB/SubscriptionInterval.hpp>
 #include <uORB/topics/parameter_update.h>
-
 #include <px4_platform_common/i2c_spi_buses.h>
 #include <drivers/device/device.h>
 #include <drivers/device/i2c.h>
 #include <containers/Array.hpp>
 #include <uORB/topics/distance_sensor.h>
 
+
+#include <board_config.h>
+#include <containers/Array.hpp>
+#include <drivers/device/device.h>
+#include <drivers/device/i2c.h>
+#include <drivers/drv_hrt.h>
+#include <perf/perf_counter.h>
+#include <px4_platform_common/px4_config.h>
+#include <px4_platform_common/getopt.h>
+#include <px4_platform_common/module_params.h>
+#include <px4_platform_common/module.h>
+#include <px4_platform_common/i2c_spi_buses.h>
+#include <uORB/uORB.h>
+#include <uORB/topics/distance_sensor.h>
+
+#include <px4_log.h>
+
+// ------------------------------------
+#undef PX4_DEBUG
+#define PX4_DEBUG PX4_INFO
+// ------------------------------------
+
 using namespace time_literals;
 
 extern "C" __EXPORT int tfmini_i2c_main(int argc, char *argv[]);
 
-// neeche ModuleBase ki jagah shayad I2CSPIDriver hi lagana hai, magar dekh
-// lena ek baar
 class TFMINII2C : public device::I2C, public ModuleParams, public I2CSPIDriver<TFMINII2C>
 {
 public:
@@ -59,10 +79,6 @@ public:
 	virtual ~TFMINII2C();
 
 
-	/**
-	 * Initializes the sensors, advertises uORB topic,
-	 * sets device addresses
-	 */
 	virtual int init() override;
 
 	/** @see ModuleBase */
@@ -82,6 +98,7 @@ public:
 	 * and start a new one.
 	 */
 	void RunImpl();
+
 
 private:
 
@@ -115,7 +132,7 @@ private:
 
 	orb_advert_t _distance_sensor_topic{nullptr};
 
-	perf_counter_t  _comms_errors{perf_alloc(PC_ELAPSED, "tfminii2c_comms_error")};
+	perf_counter_t  _comms_errors{perf_alloc(PC_ELAPSED, "tfminii2c_comms_errors")};
 	perf_counter_t _sample_perf{perf_alloc(PC_COUNT, "tfminii2c_sample_perf")};
 
 
@@ -135,7 +152,6 @@ private:
 		(ParamInt<px4::params::SENS_TFM_11_ORT>) _p_sensor11_rot
 	);
 
-	// Subscriptions
-	uORB::SubscriptionInterval _parameter_update_sub{ORB_ID(parameter_update), 1_s};
+	
 
 };

@@ -40,31 +40,15 @@
 // baad ke liye yaad rakhna ki boardconfig mein yeh wala driver enable karna
 // hota hai, nahi toh nahi compile hoga yeh firmware mein
 
+// AAAAAAAAAAAAAAAAAAAAAAAAAA i2cdetect -b2 kyunki cubeorange pe port 2 , 1 nahi AAAAAA
+
 #include "TFMINI_I2C.h"
 
-#include <px4_platform_common/module_params.h> // following mappydot
-#include <drivers/device/i2c.h>
-#include <px4_platform_common/px4_config.h>
-#include <uORB/uORB.h>
-#include <uORB/topics/distance_sensor.h>
-#include <uORB/Subscription.hpp>
-#include <uORB/topics/parameter_update.h>
-#include <parameters/param.h>
 
-#include <board_config.h>
-#include <containers/Array.hpp>
-#include <drivers/device/device.h>
-#include <drivers/drv_hrt.h>
-#include <perf/perf_counter.h>
-#include <px4_platform_common/getopt.h>
-#include <px4_platform_common/module.h>
-#include <px4_platform_common/i2c_spi_buses.h>
-
-#include <px4_platform_common/log.h>
-#include <px4_platform_common/posix.h>
-#include <uORB/topics/sensor_combined.h>
-#include <uORB/topics/distance_sensor.h>
-
+// ------------------------------------
+#undef PX4_DEBUG
+#define PX4_DEBUG PX4_INFO
+// ------------------------------------
 
 #define TFMINII2C_BASE_ADDR 0x7F
 #define TFMINII2C_MIN_ADDR 0x01
@@ -80,9 +64,9 @@
 void
 TFMINII2C::print_status()
 {
-	PX4_INFO("Running");
-	// TODO: print additional runtime information about the state of the module
-
+	I2CSPIDriverBase::print_status();
+	perf_print_counter(_comms_errors);
+	perf_print_counter(_sample_perf);
 	
 }
 
@@ -93,7 +77,8 @@ TFMINII2C::start()
 	ModuleParams::updateParams();
 
 	// schedule a cycle to start things (the sensor sends at 100Hz, but we run a bit faster to avoid missing data)
-	ScheduleOnInterval(7_ms);
+	// that (7_ms) is from tfmini^
+	ScheduleOnInterval(5); // 5 us, from tf02pro (5)
 }
 
 
@@ -101,7 +86,7 @@ TFMINII2C::TFMINII2C(const I2CSPIDriverConfig &config) :
 	I2C(config),
 	ModuleParams(nullptr),
 	I2CSPIDriver(config)
-{  // lightware laser serial aur i2c mein bhi aisa hi kuch kiya hai
+{  	// lightware laser serial aur i2c mein bhi aisa hi kuch kiya hai
 	set_device_type(DRV_DIST_DEVTYPE_TFMINI);
 }
 
@@ -152,6 +137,12 @@ TFMINII2C::get_sensor_rotation(const size_t index)
 int
 TFMINII2C::init()
 {	
+	// aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+	PX4_DEBUG("hate karte hate karte");
+	
+	uint8_t obtain_Data_mm[5] = {0x5A, 0x05, 0x00, 0x06, 0x67};
+	int ret = transfer(obtain_Data_mm, sizeof(obtain_Data_mm), nullptr, 0);
+
 	if (_p_sensor_enabled.get() == 0) {
 		PX4_WARN("disabled");
 		return PX4_ERROR;
@@ -163,23 +154,33 @@ TFMINII2C::init()
 	}
 
 	for (int i = 0; i <= RANGE_FINDER_MAX_SENSORS; i++) {
+		PX4_DEBUG("hate karte");
 		set_device_address(TFMINII2C_BASE_ADDR + i);
 
+		//uint8_t obtain_Data_mm[5] = {0x5A, 0x05, 0x00, 0x06, 0x65};
+
+		ret = measure();
+
+		
 		// Check if a sensor is present.
-		if (probe() != PX4_OK) {
-			break;
+		//if (probe() != PX4_OK) {
+		//	break;
+		//}
+
+		if (ret == PX4_OK) {
+			// Store I2C address
+			_sensor_addresses[i] = TFMINII2C_BASE_ADDR + i;
+			_sensor_rotations[i] = get_sensor_rotation(i);
+			_sensor_count++;
 		}
 
-		// Store I2C address
-		_sensor_addresses[i] = TFMINII2C_BASE_ADDR + i;
-		_sensor_rotations[i] = get_sensor_rotation(i);
-		_sensor_count++;
+		
 
 		// Configure the sensor
 		
 		
 
-
+		px4_usleep(50000); // 50 ms ?
 		
 		PX4_INFO("sensor %i at address 0x%02X added", i, get_device_address());
 	}
@@ -200,21 +201,60 @@ TFMINII2C::init()
 	
 }
 
+int TFMINII2C::measure()
+{
+	uint8_t obtain_Data_mm[5] = {0x5A, 0x05, 0x00, 0x06, 0x65};
+
+	int ret = transfer(obtain_Data_mm, sizeof(obtain_Data_mm), nullptr, 0);
+
+	if (ret != PX4_OK) {
+		perf_count(_comms_errors);
+		PX4_DEBUG("i2c::transfer returned %d", ret);
+		return ret;
+	}
+
+	return PX4_OK;
+}
+
+/**
+ * @brief
+ *
+ * @return int
+ * @Note
+ *   Receive Frame
+ *   Byte0: 0x59, frame header, same for each frame
+ *   Byte1: 0x59, frame header, same for each frame
+ *   Byte2: Dist_L distance value low 8 bits
+ *   Byte3: Dist_H distance value high 8 bits
+ *   Byte4: Strength_L low 8 bits
+ *   Byte5: Strength_H high 8 bits
+ *   Byte6: Temp_L low 8 bits
+ *   Byte7: Temp_H high 8 bits
+ *   Byte8: Checksum is the lower 8 bits of the cumulative sum of the number of the first 8 bytes
+ *
+ */
 int
 TFMINII2C::collect()
 {	// yaad rakhna, uorb alag alag honge alag alag sensors ke liye, 
 	//  multiple ko implement karne mein yaad rahe
-	uint8_t val[2] = {};
+
+	// aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+	PX4_DEBUG("main mere dosh humhai gande ilake se");
+
+	uint8_t val[9] {};
 	perf_begin(_sample_perf);
 
 	// Increment the sensor index, (limited to the number of sensors connected).
 	for (int index = 0; index < _sensor_count; index++) {
 
+		PX4_DEBUG("gande ilake se");
+
 		// Set address of the current sensor to collect data from.
 		set_device_address(_sensor_addresses[index]);
 
+		uint8_t obtain_Data_mm[5] = {0x5A, 0x05, 0x00, 0x06, 0x65};
 		// Transfer data from the bus.
-		int ret_val = transfer(nullptr, 0, &val[0], 2);
+		int ret_val = transfer(obtain_Data_mm, sizeof(obtain_Data_mm), val, sizeof(val));
 
 		if (ret_val < 0) {
 			PX4_ERR("sensor %i read failed, address: 0x%02X", index, _sensor_addresses[index]);
@@ -223,22 +263,29 @@ TFMINII2C::collect()
 			return ret_val;
 		}
 
-		uint16_t distance_mm = uint16_t(val[0]) << 8 | val[1];
-		float distance_m = static_cast<float>(distance_mm) / 1000.f;
+		//uint16_t strength = val[5] << 8 | val[4];
+		uint16_t distance_mm = val[3] << 8 | val[2];
+		float distance_m = float(distance_mm) * 1e-3f;
+		
+		// if strength is worse than a limit, discard reading
+		//if (strength >= 60u && distance_mm < 45000u) {
 
-		distance_sensor_s report {};
-		report.current_distance = distance_m;
-		report.device_id        = get_device_id();
-		report.max_distance     = TFMINII2C_MAX_DISTANCE;
-		report.min_distance     = TFMINII2C_MIN_DISTANCE;
-		report.orientation      = _sensor_rotations[index];
-		report.signal_quality   = -1;
-		report.timestamp        = hrt_absolute_time();
-		report.type             = distance_sensor_s::MAV_DISTANCE_SENSOR_LASER;
-		report.variance         = 0;
+			distance_sensor_s report {};
+			report.current_distance = distance_m;
+			report.device_id        = get_device_id();
+			report.max_distance     = TFMINII2C_MAX_DISTANCE;
+			report.min_distance     = TFMINII2C_MIN_DISTANCE;
+			report.orientation      = _sensor_rotations[index];
+			report.signal_quality   = -1;
+			report.timestamp        = hrt_absolute_time();
+			report.type             = distance_sensor_s::MAV_DISTANCE_SENSOR_LASER;
+			report.variance         = 0;
 
-		int instance_id;
-		orb_publish_auto(ORB_ID(distance_sensor), &_distance_sensor_topic, &report, &instance_id);
+			int instance_id;
+			orb_publish_auto(ORB_ID(distance_sensor), &_distance_sensor_topic, &report, &instance_id);
+			
+		
+		//}
 	}
 
 	perf_end(_sample_perf);
@@ -247,19 +294,7 @@ TFMINII2C::collect()
 
 
 
-void
-TFMINII2C::parameters_update(bool force)
-{
-	// check for parameter updates
-	if (_parameter_update_sub.updated() || force) {
-		// clear update
-		parameter_update_s update;
-		_parameter_update_sub.copy(&update);
 
-		// update parameters from storage
-		updateParams();
-	}
-}
 
 void
 TFMINII2C::print_usage()
@@ -270,6 +305,7 @@ TFMINII2C::print_usage()
 	PRINT_MODULE_USAGE_SUBCATEGORY("distance_sensor");
 	PRINT_MODULE_USAGE_COMMAND("start");
 	PRINT_MODULE_USAGE_PARAMS_I2C_SPI_DRIVER(true, false);
+	PRINT_MODULE_USAGE_COMMAND("set_address");
 	PRINT_MODULE_USAGE_DEFAULT_COMMANDS();
 
 }

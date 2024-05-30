@@ -47,25 +47,21 @@
 
 
 #include <board_config.h>
-#include <containers/Array.hpp>
-#include <drivers/device/device.h>
-#include <drivers/device/i2c.h>
 #include <drivers/drv_hrt.h>
 #include <perf/perf_counter.h>
 #include <px4_platform_common/px4_config.h>
 #include <px4_platform_common/getopt.h>
-#include <px4_platform_common/module_params.h>
-#include <px4_platform_common/module.h>
-#include <px4_platform_common/i2c_spi_buses.h>
 #include <uORB/uORB.h>
-#include <uORB/topics/distance_sensor.h>
 
-#include <px4_log.h>
 
 // ------------------------------------
 #undef PX4_DEBUG
 #define PX4_DEBUG PX4_INFO
 // ------------------------------------
+
+
+
+
 
 using namespace time_literals;
 
@@ -78,7 +74,10 @@ public:
 
 	virtual ~TFMINII2C();
 
-
+	/**
+	 * Initializes the sensors, advertises uORB topic,
+	 * sets device addresses
+	 */
 	virtual int init() override;
 
 	/** @see ModuleBase */
@@ -99,8 +98,20 @@ public:
 	 */
 	void RunImpl();
 
+	/**
+	 * Used to calculate checksum for address changing function
+	*/
+	int checksum(const uint8_t address);
+
+	int set_address(const uint8_t address);
+
+
+protected:
+	void custom_method(const BusCLIArguments &cli) override;
 
 private:
+
+	
 
 	/**
 	 * Collects the most recent sensor measurement data from the i2c bus.
@@ -108,6 +119,7 @@ private:
 	int collect();
 
 	int measure();
+
 
 	/**
 	 * Gets the current sensor rotation value.

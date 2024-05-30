@@ -50,16 +50,41 @@
 #define PX4_DEBUG PX4_INFO
 // ------------------------------------
 
-#define TFMINII2C_BASE_ADDR 0x7F
+#define TFMINII2C_BASE_ADDR 0x09 // 0x01 hona chahiyeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
 #define TFMINII2C_MIN_ADDR 0x01
 
 #define TFMINII2C_MIN_DISTANCE 0.04f // min should be 3 but is taken as 0.4m, due to EKF
 #define TFMINII2C_MAX_DISTANCE 12.0f // issues
 
-#define TFMINII2C_BUS_SPEED 100 // (100 ms) kuch bhi...
+#define TFMINII2C_BUS_SPEED 100000 // (100 ms) kuch bhi...
 
 #define RANGE_FINDER_MAX_SENSORS 12
 #define TFMINII2C_INTERVAL_BETWEEN_SUCCESSIVE_FIRES 150 // (150 ms) minimum is 100 ms
+
+// TFmini Plus Control Commands
+#define TFMINI_ENABLE_OUTPUT {0x5A, 0x05, 0x07, 0x01, 0x67}
+#define TFMINI_FRAME_RATE_ZERO {0x5A, 0x06, 0x03, 0x00, 0x00, 0x9D}
+#define TFMINI_FRAME_RATE_HUNDRED {0x5A, 0x06, 0x03, 0x00, 0x64, 0xC7}
+#define TFMINI_OBTAIN_DATA_MM {0x5A, 0x05, 0x00, 0x06, 0x65}
+#define TFMINI_FW_VERSION {0x5A, 0x04, 0x01, 0x5F}
+#define TFMINI_SAVE_SETTINGS {0x5A, 0x04, 0x11, 0x6F}
+#define TFMINI_RESET {0x5A, 0x04, 0x02, 0x60}
+#define TFMINI_I2C {0x5A, 0x05, 0x0A, 0x01, 0x6A}
+
+// TFmini addresses
+#define TFMINI_ADD1 {0x5A, 0x05, 0x0B, 0x01, 0x6B}
+#define TFMINI_ADD2 {0x5A, 0x05, 0x0B, 0x02, 0x6C}
+#define TFMINI_ADD3 {0x5A, 0x05, 0x0B, 0x03, 0x6D}
+#define TFMINI_ADD4 {0x5A, 0x05, 0x0B, 0x04, 0x6E}
+#define TFMINI_ADD5 {0x5A, 0x05, 0x0B, 0x05, 0x6F}
+#define TFMINI_ADD6 {0x5A, 0x05, 0x0B, 0x06, 0x70}
+#define TFMINI_ADD7 {0x5A, 0x05, 0x0B, 0x07, 0x71}
+#define TFMINI_ADD8 {0x5A, 0x05, 0x0B, 0x08, 0x72}
+#define TFMINI_ADD9 {0x5A, 0x05, 0x0B, 0x09, 0x73}
+#define TFMINI_ADD10 {0x5A, 0x05, 0x0B, 0x11, 0x75}
+#define TFMINI_ADD11 {0x5A, 0x05, 0x0B, 0x12, 0x76}
+#define TFMINI_ADD12 {0x5A, 0x05, 0x0B, 0x13, 0x77}
+
 
 void
 TFMINII2C::print_status()
@@ -73,6 +98,7 @@ TFMINII2C::print_status()
 void
 TFMINII2C::start()
 {
+	PX4_DEBUG("staaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaarrrrrrrrrrrrrrrrrrrtttt");
 	// Fetch parameter values.
 	ModuleParams::updateParams();
 
@@ -88,6 +114,7 @@ TFMINII2C::TFMINII2C(const I2CSPIDriverConfig &config) :
 	I2CSPIDriver(config)
 {  	// lightware laser serial aur i2c mein bhi aisa hi kuch kiya hai
 	set_device_type(DRV_DIST_DEVTYPE_TFMINI);
+	//set_bus_clock(2,0); // setting bus clock speed to zero for connection
 }
 
 TFMINII2C::~TFMINII2C()
@@ -137,35 +164,59 @@ TFMINII2C::get_sensor_rotation(const size_t index)
 int
 TFMINII2C::init()
 {	
-	// aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-	PX4_DEBUG("hate karte hate karte");
+	set_device_address(0x10);
+		
+	uint8_t input_command[] = TFMINI_FW_VERSION ;
+	int lidar_output = transfer(input_command, sizeof(input_command), nullptr, 0);
+	px4_usleep(1_s);
+	uint8_t val[7] {};
+	lidar_output = transfer(nullptr, 0, val, 7);
+	PX4_DEBUG("%i",lidar_output);
+	PX4_DEBUG("ek din pyaaar, fir dusre din tum 0x%02x",val[0]);
 	
-	uint8_t obtain_Data_mm[5] = {0x5A, 0x05, 0x00, 0x06, 0x67};
-	int ret = transfer(obtain_Data_mm, sizeof(obtain_Data_mm), nullptr, 0);
+	// aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+	//PX4_DEBUG("hate karte hate karte");
+
+	
+	// aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+	//PX4_DEBUG("ek din pyaaar, fir dusre din tum 0x%02x",ret);
 
 	if (_p_sensor_enabled.get() == 0) {
 		PX4_WARN("disabled");
 		return PX4_ERROR;
 	}
 
+	// aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+	PX4_DEBUG("ek din pyaar, fir dusre din tum hate karte");
+
 	// Initialize the I2C device
 	if (I2C::init() != OK) {
+		PX4_DEBUG("hate karte");
 		return PX4_ERROR;
+		
 	}
 
+	//PX4_DEBUG("teesre din pe vaar, fir chauthe din tum chase karte");
+	// Allow for sensor auto-addressing time
+	px4_usleep(10_s);
+	//PX4_DEBUG("panchwe din tum gate par the");
+
+	// checks for sensors from base address until a maximum of 12 sensors are found
 	for (int i = 0; i <= RANGE_FINDER_MAX_SENSORS; i++) {
-		PX4_DEBUG("hate karte");
 		set_device_address(TFMINII2C_BASE_ADDR + i);
+		//PX4_DEBUG("trend bana yahan pe 0x%02X ko hate karte", TFMINII2C_BASE_ADDR + i);
 
 		//uint8_t obtain_Data_mm[5] = {0x5A, 0x05, 0x00, 0x06, 0x65};
 
-		ret = measure();
+		int ret = measure();
 
 		
 		// Check if a sensor is present.
-		//if (probe() != PX4_OK) {
-		//	break;
-		//}
+		if (probe() != PX4_OK) {
+			break;
+		}
+
+		//PX4_DEBUG("measure %i",ret);
 
 		if (ret == PX4_OK) {
 			// Store I2C address
@@ -173,16 +224,15 @@ TFMINII2C::init()
 			_sensor_rotations[i] = get_sensor_rotation(i);
 			_sensor_count++;
 		}
-
 		
 
 		// Configure the sensor
 		
-		
-
 		px4_usleep(50000); // 50 ms ?
 		
-		PX4_INFO("sensor %i at address 0x%02X added", i, get_device_address());
+		//PX4_INFO("sensor %i at address 0x%02X added", i, get_device_address());
+
+		//PX4_DEBUG("rotation %i",get_sensor_rotation(i));
 	}
 
 
@@ -203,7 +253,7 @@ TFMINII2C::init()
 
 int TFMINII2C::measure()
 {
-	uint8_t obtain_Data_mm[5] = {0x5A, 0x05, 0x00, 0x06, 0x65};
+	uint8_t obtain_Data_mm[] = TFMINI_OBTAIN_DATA_MM;
 
 	int ret = transfer(obtain_Data_mm, sizeof(obtain_Data_mm), nullptr, 0);
 
@@ -239,7 +289,7 @@ TFMINII2C::collect()
 	//  multiple ko implement karne mein yaad rahe
 
 	// aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-	PX4_DEBUG("main mere dosh humhai gande ilake se");
+	PX4_DEBUG("main mere dosh hum hain gande ilake se");
 
 	uint8_t val[9] {};
 	perf_begin(_sample_perf);
@@ -323,6 +373,49 @@ TFMINII2C::RunImpl()
 }
 
 int
+TFMINII2C::checksum(const uint8_t address)
+{
+    
+    int a[5] = {0xfAf, 0xf5, 0xf7, 0xf1, 0xf7};
+    // aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+    // edit it to only output the lowest 8 bits of the sum, not everything
+    printf("tgdvsstrtg 0x%02x",a[0]+a[1]+a[2]+a[3]+a[4]);
+
+    return 0;
+}
+
+
+int
+TFMINII2C::set_address(const uint8_t address)
+{
+	// The default address of a Benewake Tfmini Plus is 0x10
+	// In order to connect multiple sensors on the same bus,
+	// this function can be used to change their address, one at a time
+
+	if (_sensor_count > 1) {
+		PX4_INFO("multiple sensors are connected");
+		return PX4_ERROR;
+	}
+
+	//if (address < 0 || address > 128){
+	//	PX4_ERR("Invalid Address, please select an address from 1 to 128");
+	//	return PX4_ERROR;
+	//}
+
+
+	PX4_INFO("requested address: %u", address);
+
+	return 0;
+}
+
+
+void
+TFMINII2C::custom_method(const BusCLIArguments &cli)
+{
+	PX4_DEBUG("jaaaddddooooooo");
+}
+
+int
 tfmini_i2c_main(int argc, char *argv[])
 {
 	int ch;
@@ -357,6 +450,10 @@ tfmini_i2c_main(int argc, char *argv[])
 
 	if (!strcmp(verb, "status")) {
 		return ThisDriver::module_status(iterator);
+	}
+
+	if (!strcmp(verb, "set_address")) {
+		return ThisDriver::module_custom_method(cli, iterator);
 	}
 
 	ThisDriver::print_usage();

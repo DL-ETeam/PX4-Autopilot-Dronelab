@@ -38,5 +38,4 @@ px4_add_module(
 		TFMINI_I2C.h
 	DEPENDS
 		drivers_rangefinder
-		px4_work_queue
 	)

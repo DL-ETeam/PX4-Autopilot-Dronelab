@@ -1,6 +1,6 @@
 /****************************************************************************
  *
- *   Copyright (c) 2015-2022 PX4 Development Team. All rights reserved.
+ *   Copyright (c) 2024 PX4 Development Team. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -31,59 +31,30 @@
  *
  ****************************************************************************/
 
-/**
-* @file standard.h
-* VTOL with fixed multirotor motor configurations (such as quad) and a pusher
-* (or puller aka tractor) motor for forward flight.
-*
-* @author Simon Wilks 		<simon@uaventure.com>
-* @author Roman Bapst 		<bapstroman@gmail.com>
-* @author Andreas Antener	<andreas@uaventure.com>
-* @author Sander Smeets 	<sander@droneslab.com>
-*
-*/
+#include "loggerCheck.hpp"
 
-#ifndef STANDARD_H
-#define STANDARD_H
-#include "vtol_type.h"
+using namespace time_literals;
 
-class Standard : public VtolType
+LoggerChecks::LoggerChecks()
+	: _param_sdlog_mode_handle(param_find("SDLOG_MODE"))
 {
+	param_get(_param_sdlog_mode_handle, &_sdlog_mode);
+}
 
-public:
+void LoggerChecks::checkAndReport(const Context &context, Report &reporter)
+{
+	bool active = false;
 
-	Standard(VtolAttitudeControl *_att_controller);
-	~Standard() override = default;
+	if (_sdlog_mode >= 0) {
+		if (_logger_status_sub.advertised()) {
+			logger_status_s status;
+			_logger_status_sub.copy(&status);
 
-	void update_vtol_state() override;
-	void update_transition_state() override;
-	void update_fw_state() override;
-	void update_mc_state() override;
-	void fill_actuator_outputs() override;
-	void waiting_on_tecs() override;
-	void blendThrottleAfterFrontTransition(float scale) override;
+			if (hrt_elapsed_time(&status.timestamp) < 3_s && status.is_logging) {
+				active = true;
+			}
+		}
+	}
 
-private:
-
-	enum class vtol_mode {
-		MC_MODE = 0,
-		TRANSITION_TO_FW,
-		TRANSITION_TO_MC,
-		FW_MODE
-	};
-
-	vtol_mode _vtol_mode{vtol_mode::MC_MODE};			/**< vtol flight mode, defined by enum vtol_mode */
-
-	float _pusher_throttle{0.0f};
-	float _airspeed_trans_blend_margin{0.0f};
-	hrt_abstime _last_time_pusher_transition_update{0};
-
-	void parameters_update() override;
-
-	DEFINE_PARAMETERS_CUSTOM_PARENT(VtolType,
-					(ParamFloat<px4::params::VT_PSHER_SLEW>) _param_vt_psher_slew,
-					(ParamFloat<px4::params::VT_B_TRANS_RAMP>) _param_vt_b_trans_ramp,
-					(ParamFloat<px4::params::FW_PSP_OFF>) _param_fw_psp_off
-				       )
-};
-#endif
+	reporter.setHealth(health_component_t::logging, active, false, false);
+}

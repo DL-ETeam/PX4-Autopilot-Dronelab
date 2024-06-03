@@ -103,7 +103,7 @@ public:
 	*/
 	int checksum(const uint8_t address);
 
-	int set_address(const uint8_t address);
+	int sensor_arrangement(int num_sensors, const uint8_t oldaddr);
 
 
 protected:

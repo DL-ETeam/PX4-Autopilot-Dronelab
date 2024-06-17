@@ -563,13 +563,13 @@ $ tfmini set_address -a 4
 
 	PRINT_MODULE_USAGE_NAME("Benewake Tfmini Plus I2C", "driver");
 	PRINT_MODULE_USAGE_SUBCATEGORY("distance_sensor");
+	PRINT_MODULE_USAGE_PARAM_INT('d', 16, 0, 16, "Chosen Device Address (1 to 16)", false);
 	PRINT_MODULE_USAGE_COMMAND_DESCR("start","Start Driver");
 	PRINT_MODULE_USAGE_PARAMS_I2C_SPI_DRIVER(true, false);
 	PRINT_MODULE_USAGE_COMMAND_DESCR("stop","Stop Driver");
 	PRINT_MODULE_USAGE_COMMAND_DESCR("status","Driver Status");
-	PRINT_MODULE_USAGE_COMMAND_DESCR("set_address","Addresses from 1 to 16 only");
-	PRINT_MODULE_USAGE_PARAM_INT('d', 16, 0, 16, "Chosen Address", false);
-	PRINT_MODULE_USAGE_PARAMS_I2C_ADDRESS(0x10);
+	PRINT_MODULE_USAGE_COMMAND_DESCR("set_address","Set the Chosen Address as the new Device Address");
+	//PRINT_MODULE_USAGE_PARAMS_I2C_ADDRESS(0x10);
 	//PRINT_MODULE_USAGE_DEFAULT_COMMANDS();
 
 }
@@ -581,17 +581,18 @@ tfmini_i2c_main(int argc, char *argv[])
 	using ThisDriver = TFMINII2C;
 	BusCLIArguments cli{true, false};
 	cli.default_i2c_frequency = TFMINII2C_BUS_SPEED;
+	//cli.i2c_address = TFMINII2C_BASE_ADDR;
+
 
 	while ((ch = cli.getOpt(argc, argv, "d:")) != EOF) {
 		switch (ch) {
 		case 'd':
 			cli.i2c_address = atoi(cli.optArg());
-			PX4_DEBUG("poocha hai %i",cli.i2c_address);
+			PX4_DEBUG("Chosen Address is %i",cli.i2c_address);
 			break;
-		default:
-			cli.i2c_address = TFMINII2C_BASE_ADDR;
 		}
 	}
+
 
 	const char *verb = cli.optArg();
 
@@ -599,8 +600,6 @@ tfmini_i2c_main(int argc, char *argv[])
 		ThisDriver::print_usage();
 		return -1;
 	}
-
-	
 
 	BusInstanceIterator iterator(MODULE_NAME, cli, DRV_DIST_DEVTYPE_TFMINI);
 
@@ -617,7 +616,7 @@ tfmini_i2c_main(int argc, char *argv[])
 	}
 
 	if (!strcmp(verb, "set_address")) {
-		//PX4_DEBUG("poocha hai %c",argv[1]);
+		PX4_DEBUG("poocha hai %i",cli.i2c_address);
 		return ThisDriver::module_custom_method(cli, iterator);
 		
 	}

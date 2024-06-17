@@ -209,9 +209,6 @@ TFMINII2C::init()
 		//PX4_DEBUG("measure %i",ret);
 
 		if (ret == PX4_OK && jj < RANGE_FINDER_MAX_SENSORS) {
-			
-			_sensor_count++;
-			jj++;
 
 			// Store I2C address
 			_sensor_addresses[jj] = TFMINII2C_BASE_ADDR + i;
@@ -225,8 +222,8 @@ TFMINII2C::init()
 			transfer(nullptr,0, val, sizeof(val));
 			PX4_DEBUG("probing command reply 0x%02x",val[3]);
 
-			//sensor_arrangement(_sensor_count,TFMINII2C_BASE_ADDR + i);
-			PX4_DEBUG("address of sensor is 0x%02x",_sensor_addresses[jj]);
+			_sensor_count++;
+			jj++;
 
 		}
 		
@@ -553,7 +550,7 @@ TFMINII2C::sensor_arrangement(const uint8_t address)
 void
 TFMINII2C::custom_method(const BusCLIArguments &cli)
 {
-	//set_address(cli.i2c_address)
+	sensor_arrangement(cli.i2c_address);
 	PX4_DEBUG("jaaaddddooooooo");
 }
 
@@ -565,7 +562,7 @@ tfmini_i2c_main(int argc, char *argv[])
 	cli.default_i2c_frequency = TFMINII2C_BUS_SPEED;
 
 
-	const char *verb = cli.optArg();
+	const char *verb = cli.parseDefaultArguments(argc, argv);
 
 	if (!verb) {
 		ThisDriver::print_usage();

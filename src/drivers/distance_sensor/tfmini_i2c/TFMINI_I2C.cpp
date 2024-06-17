@@ -81,9 +81,13 @@ uint8_t TFMINI_ADD6[] = {0x5A, 0x05, 0x0B, 0x06, 0x70};
 uint8_t TFMINI_ADD7[] = {0x5A, 0x05, 0x0B, 0x07, 0x71};
 uint8_t TFMINI_ADD8[] = {0x5A, 0x05, 0x0B, 0x08, 0x72};
 uint8_t TFMINI_ADD9[] = {0x5A, 0x05, 0x0B, 0x09, 0x73};
-uint8_t TFMINI_ADD10[] = {0x5A, 0x05, 0x0B, 0x11, 0x75};
-uint8_t TFMINI_ADD11[] = {0x5A, 0x05, 0x0B, 0x12, 0x76};
-uint8_t TFMINI_ADD12[] = {0x5A, 0x05, 0x0B, 0x13, 0x77};
+uint8_t TFMINI_ADD10[] = {0x5A, 0x05, 0x0B, 0x10, 0x74};
+uint8_t TFMINI_ADD11[] = {0x5A, 0x05, 0x0B, 0x11, 0x75};
+uint8_t TFMINI_ADD12[] = {0x5A, 0x05, 0x0B, 0x12, 0x76};
+uint8_t TFMINI_ADD13[] = {0x5A, 0x05, 0x0B, 0x13, 0x77};
+uint8_t TFMINI_ADD14[] = {0x5A, 0x05, 0x0B, 0x14, 0x78};
+uint8_t TFMINI_ADD15[] = {0x5A, 0x05, 0x0B, 0x15, 0x79};
+uint8_t TFMINI_ADD16[] = {0x5A, 0x05, 0x0B, 0x16, 0x7A};
 
 
 void
@@ -221,7 +225,7 @@ TFMINII2C::init()
 			transfer(nullptr,0, val, sizeof(val));
 			PX4_DEBUG("probing command reply 0x%02x",val[3]);
 
-			sensor_arrangement(_sensor_count,TFMINII2C_BASE_ADDR + i);
+			//sensor_arrangement(_sensor_count,TFMINII2C_BASE_ADDR + i);
 			PX4_DEBUG("address of sensor is 0x%02x",_sensor_addresses[jj]);
 
 		}
@@ -376,21 +380,9 @@ TFMINII2C::RunImpl()
 	}
 }
 
-int
-TFMINII2C::checksum(const uint8_t address)
-{
-    
-    int a[5] = {0xfAf, 0xf5, 0xf7, 0xf1, 0xf7};
-    // aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-    // edit it to only output the lowest 8 bits of the sum, not everything
-    printf("tgdvsstrtg 0x%02x",a[0]+a[1]+a[2]+a[3]+a[4]);
-
-    return 0;
-}
-
 
 int
-TFMINII2C::sensor_arrangement(int num_sensors, const uint8_t oldaddr)
+TFMINII2C::sensor_arrangement(const uint8_t address)
 {
 	// The default address of a Benewake Tfmini Plus is 0x10
 	// In order to connect multiple sensors on the same bus,
@@ -405,40 +397,153 @@ TFMINII2C::sensor_arrangement(int num_sensors, const uint8_t oldaddr)
 	//	PX4_ERR("Invalid Address, please select an address from 1 to 128");
 	//	return PX4_ERROR;
 	//}
+	uint8_t val[4] {};
+	
+
+	for (int ii = 0; ii <= 128; ii++){
+		set_device_address(TFMINII2C_BASE_ADDR+ii);	
+		transfer(TFMINI_FW_VERSION,sizeof(TFMINI_FW_VERSION), val, sizeof(val));
+		px4_usleep(500_ms);
+		transfer(nullptr,0, val, sizeof(val));
+
+		if (val[1] == 07 && val[2] == 01){
+			oldaddr = TFMINII2C_BASE_ADDR+ii;
+			break;
+		}
+
+	}
 
 	set_device_address(oldaddr);
 
+
+	uint8_t addr_val[5] {};
+	uint8_t confirm_val[5] {};
 	
-
-
-	switch(num_sensors){
+	switch(address){
 		case 1:{
-			uint8_t addr_val[5] {};
-			uint8_t confirm_val[5] {};
-
 			transfer(TFMINI_ADD1,sizeof(TFMINI_ADD1), addr_val, sizeof(addr_val));
 			px4_usleep(1_s);
 			transfer(nullptr,0, addr_val, sizeof(addr_val));
 			PX4_DEBUG("address change 0x%02x",addr_val[3]);
-
-			transfer(TFMINI_SAVE_SETTINGS,sizeof(TFMINI_SAVE_SETTINGS), confirm_val, sizeof(confirm_val));
-			px4_usleep(1_s);
-
-			transfer(nullptr,0, confirm_val, sizeof(confirm_val));
-			PX4_DEBUG("save settings 0x%02x",confirm_val[4]);
-    		
 			break;
 		}
-  		case 2:
-    			// code block
-    			break;
+  		case 2:{
+			transfer(TFMINI_ADD2,sizeof(TFMINI_ADD2), addr_val, sizeof(addr_val));
+			px4_usleep(1_s);
+			transfer(nullptr,0, addr_val, sizeof(addr_val));
+			PX4_DEBUG("address change 0x%02x",addr_val[3]);
+			break;
+		}
+  		case 3:{
+			transfer(TFMINI_ADD3,sizeof(TFMINI_ADD3), addr_val, sizeof(addr_val));
+			px4_usleep(1_s);
+			transfer(nullptr,0, addr_val, sizeof(addr_val));
+			PX4_DEBUG("address change 0x%02x",addr_val[3]);
+			break;
+		}
+  		case 4:{
+			transfer(TFMINI_ADD4,sizeof(TFMINI_ADD4), addr_val, sizeof(addr_val));
+			px4_usleep(1_s);
+			transfer(nullptr,0, addr_val, sizeof(addr_val));
+			PX4_DEBUG("address change 0x%02x",addr_val[3]);
+			break;
+		}
+  		case 5:{
+			transfer(TFMINI_ADD5,sizeof(TFMINI_ADD5), addr_val, sizeof(addr_val));
+			px4_usleep(1_s);
+			transfer(nullptr,0, addr_val, sizeof(addr_val));
+			PX4_DEBUG("address change 0x%02x",addr_val[3]);
+			break;
+		}
+  		case 6:{
+			transfer(TFMINI_ADD6,sizeof(TFMINI_ADD6), addr_val, sizeof(addr_val));
+			px4_usleep(1_s);
+			transfer(nullptr,0, addr_val, sizeof(addr_val));
+			PX4_DEBUG("address change 0x%02x",addr_val[3]);
+			break;
+		}
+  		case 7:{
+			transfer(TFMINI_ADD7,sizeof(TFMINI_ADD7), addr_val, sizeof(addr_val));
+			px4_usleep(1_s);
+			transfer(nullptr,0, addr_val, sizeof(addr_val));
+			PX4_DEBUG("address change 0x%02x",addr_val[3]);
+			break;
+		}
+  		case 8:{
+			transfer(TFMINI_ADD8,sizeof(TFMINI_ADD8), addr_val, sizeof(addr_val));
+			px4_usleep(1_s);
+			transfer(nullptr,0, addr_val, sizeof(addr_val));
+			PX4_DEBUG("address change 0x%02x",addr_val[3]);
+			break;
+		}
+  		case 9:{
+			transfer(TFMINI_ADD9,sizeof(TFMINI_ADD9), addr_val, sizeof(addr_val));
+			px4_usleep(1_s);
+			transfer(nullptr,0, addr_val, sizeof(addr_val));
+			PX4_DEBUG("address change 0x%02x",addr_val[3]);
+			break;
+		}
+  		case 10:{
+			transfer(TFMINI_ADD10,sizeof(TFMINI_ADD10), addr_val, sizeof(addr_val));
+			px4_usleep(1_s);
+			transfer(nullptr,0, addr_val, sizeof(addr_val));
+			PX4_DEBUG("address change 0x%02x",addr_val[3]);
+			break;
+		}
+  		case 11:{
+			transfer(TFMINI_ADD11,sizeof(TFMINI_ADD11), addr_val, sizeof(addr_val));
+			px4_usleep(1_s);
+			transfer(nullptr,0, addr_val, sizeof(addr_val));
+			PX4_DEBUG("address change 0x%02x",addr_val[3]);
+			break;
+		}
+  		case 12:{
+			transfer(TFMINI_ADD12,sizeof(TFMINI_ADD12), addr_val, sizeof(addr_val));
+			px4_usleep(1_s);
+			transfer(nullptr,0, addr_val, sizeof(addr_val));
+			PX4_DEBUG("address change 0x%02x",addr_val[3]);
+			break;
+		}
+  		case 13:{
+			transfer(TFMINI_ADD13,sizeof(TFMINI_ADD13), addr_val, sizeof(addr_val));
+			px4_usleep(1_s);
+			transfer(nullptr,0, addr_val, sizeof(addr_val));
+			PX4_DEBUG("address change 0x%02x",addr_val[3]);
+			break;
+		}
+  		case 14:{
+			transfer(TFMINI_ADD14,sizeof(TFMINI_ADD14), addr_val, sizeof(addr_val));
+			px4_usleep(1_s);
+			transfer(nullptr,0, addr_val, sizeof(addr_val));
+			PX4_DEBUG("address change 0x%02x",addr_val[3]);
+			break;
+		}
+  		case 15:{
+			transfer(TFMINI_ADD15,sizeof(TFMINI_ADD15), addr_val, sizeof(addr_val));
+			px4_usleep(1_s);
+			transfer(nullptr,0, addr_val, sizeof(addr_val));
+			PX4_DEBUG("address change 0x%02x",addr_val[3]);
+			break;
+		}
+  		case 16:{
+			transfer(TFMINI_ADD16,sizeof(TFMINI_ADD16), addr_val, sizeof(addr_val));
+			px4_usleep(1_s);
+			transfer(nullptr,0, addr_val, sizeof(addr_val));
+			PX4_DEBUG("address change 0x%02x",addr_val[3]);
+			break;
+		}
+		
   		default:
     			// code block
 			break;
 	}
 	
 
-
+	transfer(TFMINI_SAVE_SETTINGS,sizeof(TFMINI_SAVE_SETTINGS), confirm_val, sizeof(confirm_val));
+	px4_usleep(1_s);
+	transfer(nullptr,0, confirm_val, sizeof(confirm_val));
+	PX4_DEBUG("save settings 0x%02x",confirm_val[4]);
+	
 	//PX4_INFO("requested address: %u", address);
 
 	return 0;
@@ -455,18 +560,10 @@ TFMINII2C::custom_method(const BusCLIArguments &cli)
 int
 tfmini_i2c_main(int argc, char *argv[])
 {
-	int ch;
 	using ThisDriver = TFMINII2C;
 	BusCLIArguments cli{true, false};
 	cli.default_i2c_frequency = TFMINII2C_BUS_SPEED;
 
-	while ((ch = cli.getOpt(argc, argv, "R:")) != EOF) {
-		switch (ch) {
-		case 'R':
-			cli.rotation = (Rotation)atoi(cli.optArg());
-			break;
-		}
-	}
 
 	const char *verb = cli.optArg();
 

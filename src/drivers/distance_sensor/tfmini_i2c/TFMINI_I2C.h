@@ -100,11 +100,9 @@ public:
 
 	int sensor_arrangement(const uint8_t address);
 
+	int oldaddr;
 
-	/**
-	 * Used to calculate checksum for address changing function
-	*/
-//	int checksum(const uint8_t address);
+
 
 protected:
 	void custom_method(const BusCLIArguments &cli) override;

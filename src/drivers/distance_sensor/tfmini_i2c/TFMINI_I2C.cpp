@@ -81,13 +81,13 @@ uint8_t TFMINI_ADD6[] = {0x5A, 0x05, 0x0B, 0x06, 0x70};
 uint8_t TFMINI_ADD7[] = {0x5A, 0x05, 0x0B, 0x07, 0x71};
 uint8_t TFMINI_ADD8[] = {0x5A, 0x05, 0x0B, 0x08, 0x72};
 uint8_t TFMINI_ADD9[] = {0x5A, 0x05, 0x0B, 0x09, 0x73};
-uint8_t TFMINI_ADD10[] = {0x5A, 0x05, 0x0B, 0x10, 0x74};
-uint8_t TFMINI_ADD11[] = {0x5A, 0x05, 0x0B, 0x11, 0x75};
-uint8_t TFMINI_ADD12[] = {0x5A, 0x05, 0x0B, 0x12, 0x76};
-uint8_t TFMINI_ADD13[] = {0x5A, 0x05, 0x0B, 0x13, 0x77};
-uint8_t TFMINI_ADD14[] = {0x5A, 0x05, 0x0B, 0x14, 0x78};
-uint8_t TFMINI_ADD15[] = {0x5A, 0x05, 0x0B, 0x15, 0x79};
-uint8_t TFMINI_ADD16[] = {0x5A, 0x05, 0x0B, 0x16, 0x7A};
+uint8_t TFMINI_ADD10[] = {0x5A, 0x05, 0x0B, 0x0A, 0x74};
+uint8_t TFMINI_ADD11[] = {0x5A, 0x05, 0x0B, 0x0B, 0x75};
+uint8_t TFMINI_ADD12[] = {0x5A, 0x05, 0x0B, 0x0C, 0x76};
+uint8_t TFMINI_ADD13[] = {0x5A, 0x05, 0x0B, 0x0D, 0x77};
+uint8_t TFMINI_ADD14[] = {0x5A, 0x05, 0x0B, 0x0E, 0x78};
+uint8_t TFMINI_ADD15[] = {0x5A, 0x05, 0x0B, 0x0F, 0x79};
+uint8_t TFMINI_ADD16[] = {0x5A, 0x05, 0x0B, 0x10, 0x7A};
 
 
 void
@@ -189,7 +189,7 @@ TFMINII2C::init()
 	px4_usleep(100_ms);
 
 	//PX4_DEBUG("panchwe din tum gate par the");
-	int jj = 1; // flag for counting number of sensors
+
 	// checks for sensors from base address until a maximum of 12 sensors are found
 	for (int i = 0; i <= 128; i++) {
 		set_device_address(TFMINII2C_BASE_ADDR + i);
@@ -208,22 +208,22 @@ TFMINII2C::init()
 
 		//PX4_DEBUG("measure %i",ret);
 
-		if (ret == PX4_OK && jj < RANGE_FINDER_MAX_SENSORS) {
+		if (ret == PX4_OK && _sensor_count <= RANGE_FINDER_MAX_SENSORS) {
 
 			// Store I2C address
-			_sensor_addresses[jj] = TFMINII2C_BASE_ADDR + i;
-			_sensor_rotations[jj] = get_sensor_rotation(jj);
-			PX4_DEBUG("address of sensor was 0x%02x",TFMINII2C_BASE_ADDR + i);
-			uint8_t val[4] {};
-			transfer(TFMINI_RESET, sizeof(TFMINI_RESET),nullptr,0);
-			px4_usleep(1_s);
-			transfer(TFMINI_FW_VERSION,sizeof(TFMINI_FW_VERSION), val, sizeof(val));
-			px4_usleep(1_s);
-			transfer(nullptr,0, val, sizeof(val));
-			PX4_DEBUG("probing command reply 0x%02x",val[3]);
+			_sensor_addresses[_sensor_count] = TFMINII2C_BASE_ADDR + i;
+			_sensor_rotations[_sensor_count] = get_sensor_rotation(_sensor_count);
+			
+			//PX4_DEBUG("address of sensor was 0x%02x",TFMINII2C_BASE_ADDR + i);
+			//uint8_t val[4] {};
+			//transfer(TFMINI_RESET, sizeof(TFMINI_RESET),nullptr,0);
+			//px4_usleep(1_s);
+			//transfer(TFMINI_FW_VERSION,sizeof(TFMINI_FW_VERSION), val, sizeof(val));
+			//px4_usleep(1_s);
+			//transfer(nullptr,0, val, sizeof(val));
+			//PX4_DEBUG("probing command reply 0x%02x",val[3]);
 
 			_sensor_count++;
-			jj++;
 
 		}
 		
@@ -349,22 +349,6 @@ TFMINII2C::collect()
 
 
 
-
-
-void
-TFMINII2C::print_usage()
-{
-	
-
-	PRINT_MODULE_USAGE_NAME("Benewake Tfmini Plus I2C", "driver");
-	PRINT_MODULE_USAGE_SUBCATEGORY("distance_sensor");
-	PRINT_MODULE_USAGE_COMMAND("start");
-	PRINT_MODULE_USAGE_PARAMS_I2C_SPI_DRIVER(true, false);
-	PRINT_MODULE_USAGE_COMMAND("set_address");
-	PRINT_MODULE_USAGE_DEFAULT_COMMANDS();
-
-}
-
 void
 TFMINII2C::RunImpl()
 {
@@ -394,16 +378,14 @@ TFMINII2C::sensor_arrangement(const uint8_t address)
 	//	PX4_ERR("Invalid Address, please select an address from 1 to 128");
 	//	return PX4_ERROR;
 	//}
-	uint8_t val[4] {};
 	
 
 	for (int ii = 0; ii <= 128; ii++){
-		set_device_address(TFMINII2C_BASE_ADDR+ii);	
-		transfer(TFMINI_FW_VERSION,sizeof(TFMINI_FW_VERSION), val, sizeof(val));
-		px4_usleep(500_ms);
-		transfer(nullptr,0, val, sizeof(val));
 
-		if (val[1] == 07 && val[2] == 01){
+		set_device_address(TFMINII2C_BASE_ADDR+ii);	
+		int ret = measure();
+
+		if (ret == PX4_OK){
 			oldaddr = TFMINII2C_BASE_ADDR+ii;
 			break;
 		}
@@ -412,7 +394,15 @@ TFMINII2C::sensor_arrangement(const uint8_t address)
 
 	set_device_address(oldaddr);
 
+//	uint8_t val[4] {};
+//	transfer(TFMINI_RESET, sizeof(TFMINI_RESET),nullptr,0);
+//	px4_usleep(1_s);
+//	transfer(TFMINI_FW_VERSION,sizeof(TFMINI_FW_VERSION), val, sizeof(val));
+//	px4_usleep(1_s);
+//	transfer(nullptr,0, val, sizeof(val));
+//	PX4_DEBUG("probing command reply 0x%02x",val[3]);
 
+	PX4_DEBUG("request kiya hai 0x%02x",address);
 	uint8_t addr_val[5] {};
 	uint8_t confirm_val[5] {};
 	
@@ -531,7 +521,7 @@ TFMINII2C::sensor_arrangement(const uint8_t address)
 		}
 		
   		default:
-    			// code block
+    		PX4_DEBUG("kat ta hi chala gaya");
 			break;
 	}
 	
@@ -543,7 +533,7 @@ TFMINII2C::sensor_arrangement(const uint8_t address)
 	
 	//PX4_INFO("requested address: %u", address);
 
-	return 0;
+	return PX4_OK;
 }
 
 
@@ -554,20 +544,63 @@ TFMINII2C::custom_method(const BusCLIArguments &cli)
 	PX4_DEBUG("jaaaddddooooooo");
 }
 
+void
+TFMINII2C::print_usage()
+{
+	PRINT_MODULE_DESCRIPTION(
+		R"DESCR_STR(
+### Description
+
+I2C bus driver for the Benewake TFmini Plus LiDAR.
+
+### Examples
+
+Attempt to start driver on a specified serial device.
+$ tfmini_i2c status
+$ tfmini_i2c stop
+$ tfmini set_address -a 4
+)DESCR_STR");
+
+	PRINT_MODULE_USAGE_NAME("Benewake Tfmini Plus I2C", "driver");
+	PRINT_MODULE_USAGE_SUBCATEGORY("distance_sensor");
+	PRINT_MODULE_USAGE_COMMAND_DESCR("start","Start Driver");
+	PRINT_MODULE_USAGE_PARAMS_I2C_SPI_DRIVER(true, false);
+	PRINT_MODULE_USAGE_COMMAND_DESCR("stop","Stop Driver");
+	PRINT_MODULE_USAGE_COMMAND_DESCR("status","Driver Status");
+	PRINT_MODULE_USAGE_COMMAND_DESCR("set_address","Addresses from 1 to 16 only");
+	PRINT_MODULE_USAGE_PARAM_INT('d', 16, 0, 16, "Chosen Address", false);
+	PRINT_MODULE_USAGE_PARAMS_I2C_ADDRESS(0x10);
+	//PRINT_MODULE_USAGE_DEFAULT_COMMANDS();
+
+}
+
 int
 tfmini_i2c_main(int argc, char *argv[])
 {
+	int ch;
 	using ThisDriver = TFMINII2C;
 	BusCLIArguments cli{true, false};
 	cli.default_i2c_frequency = TFMINII2C_BUS_SPEED;
 
+	while ((ch = cli.getOpt(argc, argv, "d:")) != EOF) {
+		switch (ch) {
+		case 'd':
+			cli.i2c_address = atoi(cli.optArg());
+			PX4_DEBUG("poocha hai %i",cli.i2c_address);
+			break;
+		default:
+			cli.i2c_address = TFMINII2C_BASE_ADDR;
+		}
+	}
 
-	const char *verb = cli.parseDefaultArguments(argc, argv);
+	const char *verb = cli.optArg();
 
 	if (!verb) {
 		ThisDriver::print_usage();
 		return -1;
 	}
+
+	
 
 	BusInstanceIterator iterator(MODULE_NAME, cli, DRV_DIST_DEVTYPE_TFMINI);
 
@@ -584,7 +617,9 @@ tfmini_i2c_main(int argc, char *argv[])
 	}
 
 	if (!strcmp(verb, "set_address")) {
+		//PX4_DEBUG("poocha hai %c",argv[1]);
 		return ThisDriver::module_custom_method(cli, iterator);
+		
 	}
 
 	ThisDriver::print_usage();

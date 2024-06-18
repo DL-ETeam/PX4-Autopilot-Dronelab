@@ -551,24 +551,24 @@ TFMINII2C::print_usage()
 		R"DESCR_STR(
 ### Description
 
-I2C bus driver for the Benewake TFmini Plus LiDAR.
+I2C bus driver for the Benewake TFmini Plus I2C LiDAR.
 
 ### Examples
 
 Attempt to start driver on a specified serial device.
 $ tfmini_i2c status
 $ tfmini_i2c stop
-$ tfmini set_address -a 4
+$ tfmini set_address -d 4
 )DESCR_STR");
 
-	PRINT_MODULE_USAGE_NAME("Benewake Tfmini Plus I2C", "driver");
+	PRINT_MODULE_USAGE_NAME("tfmini_i2c", "driver");
 	PRINT_MODULE_USAGE_SUBCATEGORY("distance_sensor");
-	PRINT_MODULE_USAGE_PARAM_INT('d', 16, 0, 16, "Chosen Device Address (1 to 16)", false);
 	PRINT_MODULE_USAGE_COMMAND_DESCR("start","Start Driver");
 	PRINT_MODULE_USAGE_PARAMS_I2C_SPI_DRIVER(true, false);
 	PRINT_MODULE_USAGE_COMMAND_DESCR("stop","Stop Driver");
 	PRINT_MODULE_USAGE_COMMAND_DESCR("status","Driver Status");
 	PRINT_MODULE_USAGE_COMMAND_DESCR("set_address","Set the Chosen Address as the new Device Address");
+	PRINT_MODULE_USAGE_PARAM_INT('d', 16, 0, 16, "Chosen Device Address (1 to 16)", false);
 	//PRINT_MODULE_USAGE_PARAMS_I2C_ADDRESS(0x10);
 	//PRINT_MODULE_USAGE_DEFAULT_COMMANDS();
 
@@ -578,6 +578,7 @@ int
 tfmini_i2c_main(int argc, char *argv[])
 {
 	int ch;
+	//uint8_t addr = TFMINII2C_BASE_ADDR;
 	using ThisDriver = TFMINII2C;
 	BusCLIArguments cli{true, false};
 	cli.default_i2c_frequency = TFMINII2C_BUS_SPEED;
@@ -587,9 +588,12 @@ tfmini_i2c_main(int argc, char *argv[])
 	while ((ch = cli.getOpt(argc, argv, "d:")) != EOF) {
 		switch (ch) {
 		case 'd':
-			cli.i2c_address = atoi(cli.optArg());
+			//addr = (uint8_t)atoi(cli.optArg());
+			cli.i2c_address = (uint8_t)atoi(cli.optArg());
 			PX4_DEBUG("Chosen Address is %i",cli.i2c_address);
 			break;
+		default:
+			PX4_DEBUG("Invalid command");
 		}
 	}
 
@@ -616,6 +620,20 @@ tfmini_i2c_main(int argc, char *argv[])
 	}
 
 	if (!strcmp(verb, "set_address")) {
+		
+		while ((ch = cli.getOpt(argc, argv, "d:")) != EOF) {
+			switch (ch) {
+			case 'd':
+				cli.i2c_address = (uint8_t)atoi(cli.optArg());
+				PX4_DEBUG("meri zindagi ka dukh is %i",cli.i2c_address);
+				break;
+			default:
+				PX4_DEBUG("Invalid command");
+			}
+		}
+
+//		cli.i2c_address = atoi(cli.optArg());
+
 		PX4_DEBUG("poocha hai %i",cli.i2c_address);
 		return ThisDriver::module_custom_method(cli, iterator);
 		

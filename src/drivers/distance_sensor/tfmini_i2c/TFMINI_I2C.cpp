@@ -380,87 +380,79 @@ TFMINII2C::sensor_arrangement(const uint8_t address)
 
 	set_device_address(oldaddr);
 
-	//PX4_DEBUG("request kiya hai 0x%02x",address);
-	uint8_t addr_val[5] {};
-	//uint8_t confirm_val[5] {};
-	
 	switch(address){
 		case 1:{
-			transfer(TFMINI_ADD1,sizeof(TFMINI_ADD1), addr_val, sizeof(addr_val));
+			transfer(TFMINI_ADD1,sizeof(TFMINI_ADD1), nullptr, 0);
 			break;
 		}
   		case 2:{
-			transfer(TFMINI_ADD2,sizeof(TFMINI_ADD2), addr_val, sizeof(addr_val));
+			transfer(TFMINI_ADD2,sizeof(TFMINI_ADD2), nullptr, 0);
 			break;
 		}
   		case 3:{
-			transfer(TFMINI_ADD3,sizeof(TFMINI_ADD3), addr_val, sizeof(addr_val));
+			transfer(TFMINI_ADD3,sizeof(TFMINI_ADD3), nullptr, 0);
 			break;
 		}
   		case 4:{
-			transfer(TFMINI_ADD4,sizeof(TFMINI_ADD4), addr_val, sizeof(addr_val));
+			transfer(TFMINI_ADD4,sizeof(TFMINI_ADD4), nullptr, 0);
 			break;
 		}
   		case 5:{
-			transfer(TFMINI_ADD5,sizeof(TFMINI_ADD5), addr_val, sizeof(addr_val));
+			transfer(TFMINI_ADD5,sizeof(TFMINI_ADD5), nullptr, 0);
 			break;
 		}
   		case 6:{
-			transfer(TFMINI_ADD6,sizeof(TFMINI_ADD6), addr_val, sizeof(addr_val));
+			transfer(TFMINI_ADD6,sizeof(TFMINI_ADD6), nullptr, 0);
 			break;
 		}
   		case 7:{
-			transfer(TFMINI_ADD7,sizeof(TFMINI_ADD7), addr_val, sizeof(addr_val));
+			transfer(TFMINI_ADD7,sizeof(TFMINI_ADD7), nullptr, 0);
 			break;
 		}
   		case 8:{
-			transfer(TFMINI_ADD8,sizeof(TFMINI_ADD8), addr_val, sizeof(addr_val));
+			transfer(TFMINI_ADD8,sizeof(TFMINI_ADD8), nullptr, 0);
 			break;
 		}
   		case 9:{
-			transfer(TFMINI_ADD9,sizeof(TFMINI_ADD9), addr_val, sizeof(addr_val));
+			transfer(TFMINI_ADD9,sizeof(TFMINI_ADD9), nullptr, 0);
 			break;
 		}
   		case 10:{
-			transfer(TFMINI_ADD10,sizeof(TFMINI_ADD10), addr_val, sizeof(addr_val));
+			transfer(TFMINI_ADD10,sizeof(TFMINI_ADD10), nullptr, 0);
 			break;
 		}
   		case 11:{
-			transfer(TFMINI_ADD11,sizeof(TFMINI_ADD11), addr_val, sizeof(addr_val));
+			transfer(TFMINI_ADD11,sizeof(TFMINI_ADD11), nullptr, 0);
 			break;
 		}
   		case 12:{
-			transfer(TFMINI_ADD12,sizeof(TFMINI_ADD12), addr_val, sizeof(addr_val));
+			transfer(TFMINI_ADD12,sizeof(TFMINI_ADD12), nullptr, 0);
 			break;
 		}
   		case 13:{
-			transfer(TFMINI_ADD13,sizeof(TFMINI_ADD13), addr_val, sizeof(addr_val));
+			transfer(TFMINI_ADD13,sizeof(TFMINI_ADD13), nullptr, 0);
 			break;
 		}
   		case 14:{
-			transfer(TFMINI_ADD14,sizeof(TFMINI_ADD14), addr_val, sizeof(addr_val));
+			transfer(TFMINI_ADD14,sizeof(TFMINI_ADD14), nullptr, 0);
 			break;
 		}
   		case 15:{
-			transfer(TFMINI_ADD15,sizeof(TFMINI_ADD15), addr_val, sizeof(addr_val));
+			transfer(TFMINI_ADD15,sizeof(TFMINI_ADD15), nullptr, 0);
 			break;
 		}
   		case 16:{
-			transfer(TFMINI_ADD16,sizeof(TFMINI_ADD16), addr_val, sizeof(addr_val));
+			transfer(TFMINI_ADD16,sizeof(TFMINI_ADD16), nullptr, 0);
 			break;
 		}
 		
   		default:
-    		transfer(TFMINI_ADD16,sizeof(TFMINI_ADD16), addr_val, sizeof(addr_val));
+    		transfer(TFMINI_ADD16,sizeof(TFMINI_ADD16), nullptr, 0);
 	}
 	
-	//px4_usleep(1_s);
+	px4_usleep(500_ms);
 	transfer(TFMINI_SAVE_SETTINGS,sizeof(TFMINI_SAVE_SETTINGS), nullptr, 0);
-	//px4_usleep(1_s);
-	//transfer(nullptr,0, confirm_val, sizeof(confirm_val));
-	//PX4_DEBUG("save settings 0x%02x",confirm_val[4]);
-	
-	//PX4_INFO("requested address: %u", address);
+	px4_usleep(1_s);
 
 	return PX4_OK;
 }

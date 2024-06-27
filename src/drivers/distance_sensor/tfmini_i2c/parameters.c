@@ -40,7 +40,7 @@
  * @max 1
  * @group Sensors
  * @value 0 Disabled
- * @value 1 Autodetect
+ * @value 1 Enabled
  */
 PARAM_DEFINE_INT32(SENS_EN_TFMI2C, 0);
 

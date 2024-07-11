@@ -45,11 +45,6 @@
 #include "TFMINI_I2C.h"
 
 
-// ------------------------------------
-#undef PX4_DEBUG
-#define PX4_DEBUG PX4_INFO
-// ------------------------------------
-
 #define TFMINII2C_BASE_ADDR 0x01 // 0x01 hona chahiyeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
 //#define TFMINII2C_MAX_ADDR 0x07F // not used
 
@@ -199,29 +194,12 @@ TFMINII2C::init()
 
 		int ret = measure();
 
-		
-		// Check if a sensor is present.
-		//if (probe() != PX4_OK) {
-		//	PX4_DEBUG("pppeeeecccoooorrrraaa");
-		//	break;
-		//}
-
-		//PX4_DEBUG("measure %i",ret);
 
 		if (ret == PX4_OK && _sensor_count <= RANGE_FINDER_MAX_SENSORS) {
 
 			// Store I2C address
 			_sensor_addresses[_sensor_count] = TFMINII2C_BASE_ADDR + i;
 			_sensor_rotations[_sensor_count] = get_sensor_rotation(_sensor_count);
-			
-			//PX4_DEBUG("address of sensor was 0x%02x",TFMINII2C_BASE_ADDR + i);
-			//uint8_t val[4] {};
-			//transfer(TFMINI_RESET, sizeof(TFMINI_RESET),nullptr,0);
-			//px4_usleep(1_s);
-			//transfer(TFMINI_FW_VERSION,sizeof(TFMINI_FW_VERSION), val, sizeof(val));
-			//px4_usleep(1_s);
-			//transfer(nullptr,0, val, sizeof(val));
-			//PX4_DEBUG("probing command reply 0x%02x",val[3]);
 
 			_sensor_count++;
 
@@ -258,12 +236,29 @@ int TFMINII2C::measure()
 {
 	//uint8_t obtain_Data_mm[] = TFMINI_OBTAIN_DATA_MM;
 
-	int ret = transfer(TFMINI_OBTAIN_DATA_MM, sizeof(TFMINI_OBTAIN_DATA_MM), nullptr, 0);
+	uint8_t val[6] {};
+	
+	int ret = transfer(TFMINI_FW_VERSION, sizeof(TFMINI_FW_VERSION), val, sizeof(val));
+
+	px4_usleep(10_ms);
+	
+	ret = transfer(TFMINI_FW_VERSION, sizeof(TFMINI_FW_VERSION), val, sizeof(val));
 
 	if (ret != PX4_OK) {
 		perf_count(_comms_errors);
 		//PX4_DEBUG("i2c::transfer returned %d", ret);
-		return ret;
+		return PX4_ERROR;
+	}
+
+
+	PX4_DEBUG("i2c::tfmini firmware %d", val[0]);
+	PX4_DEBUG("i2c::tfmini firmware %d", val[1]);
+	PX4_DEBUG("i2c::tfmini firmware %d", val[2]);
+
+	if (val[0] != 0x5A && val[1] != 0x07 && val[2] != 0x01 ) {
+		perf_count(_comms_errors);
+		PX4_DEBUG("i2c::tfmini nahi hai %d", ret);
+		return PX4_ERROR;
 	}
 
 	PX4_DEBUG("i2c::transfer returned %d", ret);
@@ -538,7 +533,6 @@ tfmini_i2c_main(int argc, char *argv[])
 
 	if (!strcmp(verb, "set_address")) {
 		PX4_DEBUG("Changing Address to %i ...",cli.i2c_address);
-		PX4_DEBUG("Please Reboot ...");
 		return ThisDriver::module_custom_method(cli, iterator);
 	}
 

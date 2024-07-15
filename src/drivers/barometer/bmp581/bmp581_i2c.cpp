@@ -1,6 +1,6 @@
 /****************************************************************************
  *
- *   Copyright (c) 2022 PX4 Development Team. All rights reserved.
+ *   Copyright (c) 2024 PX4 Development Team. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -32,38 +32,64 @@
  ****************************************************************************/
 
 /**
- * @file zero_innovation_heading_update.cpp
- * Control function for ekf heading update when at rest or no other heading source available
+ * @file bmp581_i2c.cpp
+ *
+ * I2C interface for BMP581
  */
 
-#include "ekf.h"
+#include <drivers/device/i2c.h>
 
-void Ekf::controlZeroInnovationHeadingUpdate()
+#include "bmp581.h"
+
+class BMP581_I2C: public device::I2C, public IBMP581
 {
-	const bool yaw_aiding = _control_status.flags.mag_hdg || _control_status.flags.mag_3D
-				|| _control_status.flags.ev_yaw || _control_status.flags.gps_yaw;
+public:
+	BMP581_I2C(uint8_t bus, uint32_t device, int bus_frequency);
+	virtual ~BMP581_I2C() = default;
 
-	// fuse zero innovation at a limited rate if the yaw variance is too large
-	if (!yaw_aiding
-	    && isTimedOut(_time_last_heading_fuse, (uint64_t)200'000)) {
+	int init();
 
-		// Use an observation variance larger than usual but small enough
-		// to constrain the yaw variance just below the threshold
-		const float obs_var = _control_status.flags.tilt_align ? 0.25f : 0.001f;
+	uint8_t get_reg(uint8_t addr);
+	int get_reg_buf(uint8_t addr, uint8_t *buf, uint8_t len);
+	int set_reg(uint8_t value, uint8_t addr);
 
-		estimator_aid_source1d_s aid_src_status{};
-		aid_src_status.observation = getEulerYaw(_state.quat_nominal);
-		aid_src_status.observation_variance = obs_var;
-		aid_src_status.innovation = 0.f;
+	uint32_t get_device_id() const override { return device::I2C::get_device_id(); }
 
-		VectorState H_YAW;
+	uint8_t get_device_address() const override { return device::I2C::get_device_address(); }
+};
 
-		computeYawInnovVarAndH(obs_var, aid_src_status.innovation_variance, H_YAW);
-
-		if (!_control_status.flags.tilt_align
-		    || (aid_src_status.innovation_variance - obs_var) > sq(_params.mag_heading_noise)) {
-			// The yaw variance is too large, fuse fake measurement
-			fuseYaw(aid_src_status, H_YAW);
-		}
-	}
+IBMP581 *bmp581_i2c_interface(uint8_t busnum, uint32_t device, int bus_frequency)
+{
+	return new BMP581_I2C(busnum, device, bus_frequency);
 }
+
+BMP581_I2C::BMP581_I2C(uint8_t bus, uint32_t device, int bus_frequency) :
+	I2C(DRV_BARO_DEVTYPE_BMP581, MODULE_NAME, bus, device, bus_frequency)
+{
+}
+
+int BMP581_I2C::init()
+{
+	return I2C::init();
+}
+
+uint8_t BMP581_I2C::get_reg(uint8_t addr)
+{
+	uint8_t cmd[2] = { (uint8_t)(addr), 0};
+	transfer(&cmd[0], 1, &cmd[1], 1);
+
+	return cmd[1];
+}
+
+int BMP581_I2C::get_reg_buf(uint8_t addr, uint8_t *buf, uint8_t len)
+{
+	const uint8_t cmd = (uint8_t)(addr);
+	return transfer(&cmd, sizeof(cmd), buf, len);
+}
+
+int BMP581_I2C::set_reg(uint8_t value, uint8_t addr)
+{
+	uint8_t cmd[2] = { (uint8_t)(addr), value};
+	return transfer(cmd, sizeof(cmd), nullptr, 0);
+}
+

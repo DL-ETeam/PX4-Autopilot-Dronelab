@@ -138,21 +138,27 @@ public:
 	float getHeadingInnov() const
 	{
 #if defined(CONFIG_EKF2_MAGNETOMETER)
+
 		if (_control_status.flags.mag_hdg || _control_status.flags.mag_3D) {
 			return Vector3f(_aid_src_mag.innovation).max();
 		}
+
 #endif // CONFIG_EKF2_MAGNETOMETER
 
 #if defined(CONFIG_EKF2_GNSS_YAW)
+
 		if (_control_status.flags.gps_yaw) {
 			return _aid_src_gnss_yaw.innovation;
 		}
+
 #endif // CONFIG_EKF2_GNSS_YAW
 
 #if defined(CONFIG_EKF2_EXTERNAL_VISION)
+
 		if (_control_status.flags.ev_yaw) {
 			return _aid_src_ev_yaw.innovation;
 		}
+
 #endif // CONFIG_EKF2_EXTERNAL_VISION
 
 		return 0.f;
@@ -161,21 +167,27 @@ public:
 	float getHeadingInnovVar() const
 	{
 #if defined(CONFIG_EKF2_MAGNETOMETER)
+
 		if (_control_status.flags.mag_hdg || _control_status.flags.mag_3D) {
 			return Vector3f(_aid_src_mag.innovation_variance).max();
 		}
+
 #endif // CONFIG_EKF2_MAGNETOMETER
 
 #if defined(CONFIG_EKF2_GNSS_YAW)
+
 		if (_control_status.flags.gps_yaw) {
 			return _aid_src_gnss_yaw.innovation_variance;
 		}
+
 #endif // CONFIG_EKF2_GNSS_YAW
 
 #if defined(CONFIG_EKF2_EXTERNAL_VISION)
+
 		if (_control_status.flags.ev_yaw) {
 			return _aid_src_ev_yaw.innovation_variance;
 		}
+
 #endif // CONFIG_EKF2_EXTERNAL_VISION
 
 		return 0.f;
@@ -184,21 +196,27 @@ public:
 	float getHeadingInnovRatio() const
 	{
 #if defined(CONFIG_EKF2_MAGNETOMETER)
+
 		if (_control_status.flags.mag_hdg || _control_status.flags.mag_3D) {
 			return Vector3f(_aid_src_mag.test_ratio).max();
 		}
+
 #endif // CONFIG_EKF2_MAGNETOMETER
 
 #if defined(CONFIG_EKF2_GNSS_YAW)
+
 		if (_control_status.flags.gps_yaw) {
 			return _aid_src_gnss_yaw.test_ratio;
 		}
+
 #endif // CONFIG_EKF2_GNSS_YAW
 
 #if defined(CONFIG_EKF2_EXTERNAL_VISION)
+
 		if (_control_status.flags.ev_yaw) {
 			return _aid_src_ev_yaw.test_ratio;
 		}
+
 #endif // CONFIG_EKF2_EXTERNAL_VISION
 
 		return 0.f;
@@ -490,6 +508,7 @@ public:
 				P(j, i) = P(i, j);
 			}
 		}
+
 #endif
 
 		constrainStateVariances();
@@ -499,7 +518,8 @@ public:
 		return true;
 	}
 
-	bool resetGlobalPosToExternalObservation(double lat_deg, double lon_deg, float accuracy, uint64_t timestamp_observation);
+	bool resetGlobalPosToExternalObservation(double lat_deg, double lon_deg, float accuracy,
+			uint64_t timestamp_observation);
 
 	void updateParameters();
 
@@ -546,8 +566,6 @@ private:
 	StateResets _state_reset_status{};	///< reset event monitoring structure containing velocity, position, height and yaw reset information
 	StateResetCounts _state_reset_count_prev{};
 
-	Vector3f _ang_rate_delayed_raw{};	///< uncorrected angular rate vector at fusion time horizon (rad/sec)
-
 	StateSample _state{};		///< state struct of the ekf running at the delayed time horizon
 
 	bool _filter_initialised{false};	///< true when the EKF sttes and covariances been initialised
@@ -576,7 +594,7 @@ private:
 	SquareMatrixState P{};	///< state covariance matrix
 
 #if defined(CONFIG_EKF2_DRAG_FUSION)
-	estimator_aid_source2d_s _aid_src_drag{};
+	estimator_aid_source2d_s _aid_src_drag {};
 #endif // CONFIG_EKF2_DRAG_FUSION
 
 #if defined(CONFIG_EKF2_TERRAIN)
@@ -587,11 +605,11 @@ private:
 #endif // CONFIG_EKF2_TERRAIN
 
 #if defined(CONFIG_EKF2_RANGE_FINDER)
-	estimator_aid_source1d_s _aid_src_rng_hgt{};
+	estimator_aid_source1d_s _aid_src_rng_hgt {};
 #endif // CONFIG_EKF2_RANGE_FINDER
 
 #if defined(CONFIG_EKF2_OPTICAL_FLOW)
-	estimator_aid_source2d_s _aid_src_optical_flow{};
+	estimator_aid_source2d_s _aid_src_optical_flow {};
 
 	// optical flow processing
 	Vector3f _flow_gyro_bias{};	///< bias errors in optical flow sensor rate gyro outputs (rad/sec)
@@ -603,17 +621,17 @@ private:
 #endif // CONFIG_EKF2_OPTICAL_FLOW
 
 #if defined(CONFIG_EKF2_AIRSPEED)
-	estimator_aid_source1d_s _aid_src_airspeed{};
+	estimator_aid_source1d_s _aid_src_airspeed {};
 #endif // CONFIG_EKF2_AIRSPEED
 #if defined(CONFIG_EKF2_SIDESLIP)
-	estimator_aid_source1d_s _aid_src_sideslip{};
+	estimator_aid_source1d_s _aid_src_sideslip {};
 #endif // CONFIG_EKF2_SIDESLIP
 
 	estimator_aid_source2d_s _aid_src_fake_pos{};
 	estimator_aid_source1d_s _aid_src_fake_hgt{};
 
 #if defined(CONFIG_EKF2_EXTERNAL_VISION)
-	estimator_aid_source1d_s _aid_src_ev_hgt{};
+	estimator_aid_source1d_s _aid_src_ev_hgt {};
 	estimator_aid_source2d_s _aid_src_ev_pos{};
 	estimator_aid_source3d_s _aid_src_ev_vel{};
 	estimator_aid_source1d_s _aid_src_ev_yaw{};
@@ -624,7 +642,7 @@ private:
 #endif // CONFIG_EKF2_EXTERNAL_VISION
 
 #if defined(CONFIG_EKF2_GNSS)
-	bool _gps_data_ready{false};	///< true when new GPS data has fallen behind the fusion time horizon and is available to be fused
+	bool _gps_data_ready {false};	///< true when new GPS data has fallen behind the fusion time horizon and is available to be fused
 
 	// variables used for the GPS quality checks
 	Vector3f _gps_pos_deriv_filt{};	///< GPS NED position derivative (m/sec)
@@ -647,16 +665,16 @@ private:
 	estimator_aid_source3d_s _aid_src_gnss_vel{};
 
 # if defined(CONFIG_EKF2_GNSS_YAW)
-	estimator_aid_source1d_s _aid_src_gnss_yaw{};
+	estimator_aid_source1d_s _aid_src_gnss_yaw {};
 # endif // CONFIG_EKF2_GNSS_YAW
 #endif // CONFIG_EKF2_GNSS
 
 #if defined(CONFIG_EKF2_GRAVITY_FUSION)
-	estimator_aid_source3d_s _aid_src_gravity{};
+	estimator_aid_source3d_s _aid_src_gravity {};
 #endif // CONFIG_EKF2_GRAVITY_FUSION
 
 #if defined(CONFIG_EKF2_AUXVEL)
-	estimator_aid_source2d_s _aid_src_aux_vel{};
+	estimator_aid_source2d_s _aid_src_aux_vel {};
 #endif // CONFIG_EKF2_AUXVEL
 
 	// Variables used by the initial filter alignment
@@ -665,7 +683,7 @@ private:
 	AlphaFilter<Vector3f> _gyro_lpf{0.1f};	///< filtered gyro measurement used for alignment excessive movement check (rad/sec)
 
 #if defined(CONFIG_EKF2_BAROMETER)
-	estimator_aid_source1d_s _aid_src_baro_hgt{};
+	estimator_aid_source1d_s _aid_src_baro_hgt {};
 
 	// Variables used to perform in flight resets and switch between height sources
 	AlphaFilter<float> _baro_lpf{0.1f};	///< filtered barometric height measurement (m)
@@ -729,7 +747,8 @@ private:
 
 #if defined(CONFIG_EKF2_MAGNETOMETER)
 	// ekf sequential fusion of magnetometer measurements
-	bool fuseMag(const Vector3f &mag, const float R_MAG, VectorState &H, estimator_aid_source3d_s &aid_src, bool update_all_states = false, bool update_tilt = false);
+	bool fuseMag(const Vector3f &mag, const float R_MAG, VectorState &H, estimator_aid_source3d_s &aid_src,
+		     bool update_all_states = false, bool update_tilt = false);
 
 	// fuse magnetometer declination measurement
 	// argument passed in is the declination uncertainty in radians
@@ -790,7 +809,8 @@ private:
 	void resetVerticalVelocityToZero();
 
 	// horizontal and vertical position aid source
-	void updateVerticalPositionAidStatus(estimator_aid_source1d_s &aid_src, const uint64_t &time_us, const float observation, const float observation_variance, const float innovation_gate = 1.f) const;
+	void updateVerticalPositionAidStatus(estimator_aid_source1d_s &aid_src, const uint64_t &time_us,
+					     const float observation, const float observation_variance, const float innovation_gate = 1.f) const;
 
 	// horizontal and vertical position fusion
 	bool fuseHorizontalPosition(estimator_aid_source2d_s &pos_aid_src);
@@ -821,7 +841,7 @@ private:
 
 #if defined(CONFIG_EKF2_RANGE_FINDER)
 	// range height
-	void controlRangeHaglFusion();
+	void controlRangeHaglFusion(const imuSample &imu_delayed);
 	bool isConditionalRangeAidSuitable();
 	void stopRngHgtFusion();
 	void stopRngTerrFusion();
@@ -870,6 +890,7 @@ private:
 		}
 
 #if defined(CONFIG_EKF2_MAGNETOMETER)
+
 		if (!_control_status.flags.mag) {
 			for (unsigned i = 0; i < State::mag_I.dof; i++) {
 				K(State::mag_I.idx + i) = 0.f;
@@ -881,14 +902,17 @@ private:
 				K(State::mag_B.idx + i) = 0.f;
 			}
 		}
+
 #endif // CONFIG_EKF2_MAGNETOMETER
 
 #if defined(CONFIG_EKF2_WIND)
+
 		if (!_control_status.flags.wind) {
 			for (unsigned i = 0; i < State::wind_vel.dof; i++) {
 				K(State::wind_vel.idx + i) = 0.f;
 			}
 		}
+
 #endif // CONFIG_EKF2_WIND
 	}
 
@@ -910,17 +934,26 @@ private:
 
 #if defined(CONFIG_EKF2_EXTERNAL_VISION)
 	// control fusion of external vision observations
-	void controlExternalVisionFusion();
+	void controlExternalVisionFusion(const imuSample &imu_sample);
 	void updateEvAttitudeErrorFilter(extVisionSample &ev_sample, bool ev_reset);
-	void controlEvHeightFusion(const extVisionSample &ev_sample, const bool common_starting_conditions_passing, const bool ev_reset, const bool quality_sufficient, estimator_aid_source1d_s &aid_src);
-	void controlEvPosFusion(const extVisionSample &ev_sample, const bool common_starting_conditions_passing, const bool ev_reset, const bool quality_sufficient, estimator_aid_source2d_s &aid_src);
-	void controlEvVelFusion(const extVisionSample &ev_sample, const bool common_starting_conditions_passing, const bool ev_reset, const bool quality_sufficient, estimator_aid_source3d_s &aid_src);
-	void controlEvYawFusion(const extVisionSample &ev_sample, const bool common_starting_conditions_passing, const bool ev_reset, const bool quality_sufficient, estimator_aid_source1d_s &aid_src);
+	void controlEvHeightFusion(const imuSample &imu_sample, const extVisionSample &ev_sample,
+				   const bool common_starting_conditions_passing, const bool ev_reset, const bool quality_sufficient,
+				   estimator_aid_source1d_s &aid_src);
+	void controlEvPosFusion(const imuSample &imu_sample, const extVisionSample &ev_sample,
+				const bool common_starting_conditions_passing, const bool ev_reset, const bool quality_sufficient,
+				estimator_aid_source2d_s &aid_src);
+	void controlEvVelFusion(const imuSample &imu_sample, const extVisionSample &ev_sample,
+				const bool common_starting_conditions_passing, const bool ev_reset, const bool quality_sufficient,
+				estimator_aid_source3d_s &aid_src);
+	void controlEvYawFusion(const imuSample &imu_sample, const extVisionSample &ev_sample,
+				const bool common_starting_conditions_passing, const bool ev_reset, const bool quality_sufficient,
+				estimator_aid_source1d_s &aid_src);
 	void resetVelocityToEV(const Vector3f &measurement, const Vector3f &measurement_var, const VelocityFrame &vel_frame);
 	Vector3f rotateVarianceToEkf(const Vector3f &measurement_var);
 
 	void startEvPosFusion(const Vector2f &measurement, const Vector2f &measurement_var, estimator_aid_source2d_s &aid_src);
-	void updateEvPosFusion(const Vector2f &measurement, const Vector2f &measurement_var, bool quality_sufficient, bool reset, estimator_aid_source2d_s &aid_src);
+	void updateEvPosFusion(const Vector2f &measurement, const Vector2f &measurement_var, bool quality_sufficient,
+			       bool reset, estimator_aid_source2d_s &aid_src);
 	void stopEvPosFusion();
 	void stopEvHgtFusion();
 	void stopEvVelFusion();
@@ -937,7 +970,7 @@ private:
 	// control fusion of GPS observations
 	void controlGpsFusion(const imuSample &imu_delayed);
 	void stopGpsFusion();
-	void updateGnssVel(const gnssSample &gnss_sample, estimator_aid_source3d_s &aid_src);
+	void updateGnssVel(const imuSample &imu_sample, const gnssSample &gnss_sample, estimator_aid_source3d_s &aid_src);
 	void updateGnssPos(const gnssSample &gnss_sample, estimator_aid_source2d_s &aid_src);
 	void controlGnssYawEstimator(estimator_aid_source3d_s &aid_src_vel);
 	bool tryYawEmergencyReset();
@@ -986,7 +1019,7 @@ private:
 
 #if defined(CONFIG_EKF2_MAGNETOMETER)
 	// control fusion of magnetometer observations
-	void controlMagFusion();
+	void controlMagFusion(const imuSample &imu_sample);
 
 	bool checkHaglYawResetReq() const;
 
@@ -1019,7 +1052,7 @@ private:
 
 #if defined(CONFIG_EKF2_AUXVEL)
 	// control fusion of auxiliary velocity observations
-	void controlAuxVelFusion();
+	void controlAuxVelFusion(const imuSample &imu_sample);
 	void stopAuxVelFusion();
 #endif // CONFIG_EKF2_AUXVEL
 
@@ -1032,13 +1065,13 @@ private:
 	void checkHeightSensorRefFallback();
 
 #if defined(CONFIG_EKF2_BAROMETER)
-	void controlBaroHeightFusion();
+	void controlBaroHeightFusion(const imuSample &imu_sample);
 	void stopBaroHgtFusion();
 
 	void updateGroundEffect();
 
 # if defined(CONFIG_EKF2_BARO_COMPENSATION)
-	float compensateBaroForDynamicPressure(float baro_alt_uncompensated) const;
+	float compensateBaroForDynamicPressure(const imuSample &imu_sample, float baro_alt_uncompensated) const;
 # endif // CONFIG_EKF2_BARO_COMPENSATION
 
 #endif // CONFIG_EKF2_BAROMETER
@@ -1091,7 +1124,7 @@ private:
 	PositionSensor _position_sensor_ref{PositionSensor::GNSS};
 
 #if defined(CONFIG_EKF2_EXTERNAL_VISION)
-	HeightBiasEstimator _ev_hgt_b_est{HeightSensor::EV, _height_sensor_ref};
+	HeightBiasEstimator _ev_hgt_b_est {HeightSensor::EV, _height_sensor_ref};
 	PositionBiasEstimator _ev_pos_b_est{PositionSensor::EV, _position_sensor_ref};
 	AlphaFilter<Quatf> _ev_q_error_filt{0.001f};
 	bool _ev_q_error_initialized{false};
@@ -1297,7 +1330,7 @@ private:
 	ZeroVelocityUpdate _zero_velocity_update{};
 
 #if defined(CONFIG_EKF2_AUX_GLOBAL_POSITION) && defined(MODULE_NAME)
-	AuxGlobalPosition _aux_global_position{};
+	AuxGlobalPosition _aux_global_position {};
 #endif // CONFIG_EKF2_AUX_GLOBAL_POSITION
 };
 

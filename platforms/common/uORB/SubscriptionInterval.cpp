@@ -1,6 +1,6 @@
 /****************************************************************************
  *
- *   Copyright (c) 2022 PX4 Development Team. All rights reserved.
+ *   Copyright (c) 2024 PX4 Development Team. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -31,39 +31,47 @@
  *
  ****************************************************************************/
 
-/**
- * @file zero_innovation_heading_update.cpp
- * Control function for ekf heading update when at rest or no other heading source available
- */
+#include "SubscriptionInterval.hpp"
 
-#include "ekf.h"
-
-void Ekf::controlZeroInnovationHeadingUpdate()
+namespace uORB
 {
-	const bool yaw_aiding = _control_status.flags.mag_hdg || _control_status.flags.mag_3D
-				|| _control_status.flags.ev_yaw || _control_status.flags.gps_yaw;
 
-	// fuse zero innovation at a limited rate if the yaw variance is too large
-	if (!yaw_aiding
-	    && isTimedOut(_time_last_heading_fuse, (uint64_t)200'000)) {
-
-		// Use an observation variance larger than usual but small enough
-		// to constrain the yaw variance just below the threshold
-		const float obs_var = _control_status.flags.tilt_align ? 0.25f : 0.001f;
-
-		estimator_aid_source1d_s aid_src_status{};
-		aid_src_status.observation = getEulerYaw(_state.quat_nominal);
-		aid_src_status.observation_variance = obs_var;
-		aid_src_status.innovation = 0.f;
-
-		VectorState H_YAW;
-
-		computeYawInnovVarAndH(obs_var, aid_src_status.innovation_variance, H_YAW);
-
-		if (!_control_status.flags.tilt_align
-		    || (aid_src_status.innovation_variance - obs_var) > sq(_params.mag_heading_noise)) {
-			// The yaw variance is too large, fuse fake measurement
-			fuseYaw(aid_src_status, H_YAW);
-		}
+bool SubscriptionInterval::updated()
+{
+	if (advertised() && (hrt_elapsed_time(&_last_update) >= _interval_us)) {
+		return _subscription.updated();
 	}
+
+	return false;
 }
+
+bool SubscriptionInterval::update(void *dst)
+{
+	if (updated()) {
+		return copy(dst);
+	}
+
+	return false;
+}
+
+bool SubscriptionInterval::copy(void *dst)
+{
+	if (_subscription.copy(dst)) {
+		const hrt_abstime now = hrt_absolute_time();
+
+		// make sure we don't set a timestamp before the timer started counting (now - _interval_us would wrap because it's unsigned)
+		if (now > _interval_us) {
+			// shift last update time forward, but don't let it get further behind than the interval
+			_last_update = math::constrain(_last_update + _interval_us, now - _interval_us, now);
+
+		} else {
+			_last_update = now;
+		}
+
+		return true;
+	}
+
+	return false;
+}
+
+} // namespace uORB

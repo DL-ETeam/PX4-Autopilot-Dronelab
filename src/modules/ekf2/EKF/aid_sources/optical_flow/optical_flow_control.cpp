@@ -56,12 +56,25 @@ void Ekf::controlOpticalFlowFusion(const imuSample &imu_delayed)
 		_ref_body_rate = -(imu_delayed.delta_ang / imu_delayed.delta_ang_dt - getGyroBias());
 
 		// ensure valid flow sample gyro rate before proceeding
-		if (!PX4_ISFINITE(_flow_sample_delayed.gyro_rate(0)) || !PX4_ISFINITE(_flow_sample_delayed.gyro_rate(1))) {
-			_flow_sample_delayed.gyro_rate = _ref_body_rate;
+		switch (static_cast<FlowGyroSource>(_params.flow_gyro_src)) {
+		default:
 
-		} else if (!PX4_ISFINITE(_flow_sample_delayed.gyro_rate(2))) {
-			// Some flow modules only provide X ind Y angular rates. If this is the case, complete the vector with our own Z gyro
-			_flow_sample_delayed.gyro_rate(2) = _ref_body_rate(2);
+		/* FALLTHROUGH */
+		case FlowGyroSource::Auto:
+			if (!PX4_ISFINITE(_flow_sample_delayed.gyro_rate(0)) || !PX4_ISFINITE(_flow_sample_delayed.gyro_rate(1))) {
+				_flow_sample_delayed.gyro_rate = _ref_body_rate;
+			}
+
+			if (!PX4_ISFINITE(_flow_sample_delayed.gyro_rate(2))) {
+				// Some flow modules only provide X ind Y angular rates. If this is the case, complete the vector with our own Z gyro
+				_flow_sample_delayed.gyro_rate(2) = _ref_body_rate(2);
+			}
+
+			break;
+
+		case FlowGyroSource::Internal:
+			_flow_sample_delayed.gyro_rate = _ref_body_rate;
+			break;
 		}
 
 		const flowSample &flow_sample = _flow_sample_delayed;
@@ -71,8 +84,6 @@ void Ekf::controlOpticalFlowFusion(const imuSample &imu_delayed)
 					    : _params.flow_qual_min_gnd;
 
 		const bool is_quality_good = (flow_sample.quality >= min_quality);
-		const bool is_magnitude_good = flow_sample.flow_rate.isAllFinite()
-					       && !flow_sample.flow_rate.longerThan(_flow_max_rate);
 
 		bool is_tilt_good = true;
 
@@ -91,8 +102,9 @@ void Ekf::controlOpticalFlowFusion(const imuSample &imu_delayed)
 		// calculate the optical flow observation variance
 		const float R_LOS = calcOptFlowMeasVar(flow_sample);
 
+		const float epsilon = 1e-3f;
 		Vector2f innov_var;
-		sym::ComputeFlowXyInnovVarAndHx(_state.vector(), P, R_LOS, FLT_EPSILON, &innov_var, &H);
+		sym::ComputeFlowXyInnovVarAndHx(_state.vector(), P, R_LOS, epsilon, &innov_var, &H);
 
 		// run the innovation consistency check and record result
 		updateAidSourceStatus(_aid_src_optical_flow,
@@ -118,16 +130,21 @@ void Ekf::controlOpticalFlowFusion(const imuSample &imu_delayed)
 					&& (_control_status.flags.inertial_dead_reckoning // is doing inertial dead-reckoning so must constrain drift urgently
 					    || isOnlyActiveSourceOfHorizontalAiding(_control_status.flags.opt_flow));
 
-		const bool is_within_max_sensor_dist = getHagl() <= _flow_max_distance;
+		const bool is_within_sensor_dist = (getHagl() >= _flow_min_distance) && (getHagl() <= _flow_max_distance);
+
+		const bool is_magnitude_good = flow_sample.flow_rate.isAllFinite()
+					       && !flow_sample.flow_rate.longerThan(_flow_max_rate)
+					       && !flow_compensated.longerThan(_flow_max_rate);
 
 		const bool continuing_conditions_passing = (_params.flow_ctrl == 1)
 				&& _control_status.flags.tilt_align
-				&& is_within_max_sensor_dist;
+				&& is_within_sensor_dist;
 
 		const bool starting_conditions_passing = continuing_conditions_passing
 				&& is_quality_good
 				&& is_magnitude_good
 				&& is_tilt_good
+				&& (isTerrainEstimateValid() || isHorizontalAidingActive())
 				&& isTimedOut(_aid_src_optical_flow.time_last_fuse, (uint64_t)2e6); // Prevent rapid switching
 
 		// If the height is relative to the ground, terrain height cannot be observed.
@@ -142,7 +159,7 @@ void Ekf::controlOpticalFlowFusion(const imuSample &imu_delayed)
 
 				// handle the case when we have optical flow, are reliant on it, but have not been using it for an extended period
 				if (isTimedOut(_aid_src_optical_flow.time_last_fuse, _params.no_aid_timeout_max)) {
-					if (is_flow_required && is_quality_good) {
+					if (is_flow_required && is_quality_good && is_magnitude_good) {
 						resetFlowFusion();
 
 						if (_control_status.flags.opt_flow_terrain && !isTerrainEstimateValid()) {
@@ -217,15 +234,29 @@ void Ekf::resetFlowFusion()
 void Ekf::resetTerrainToFlow()
 {
 	ECL_INFO("reset hagl to flow");
+
 	// TODO: use the flow data
-	_state.terrain = fmaxf(0.0f, _state.pos(2));
+	const float new_terrain = fmaxf(0.0f, _state.pos(2));
+	const float delta_terrain = new_terrain - _state.terrain;
+	_state.terrain = new_terrain;
 	P.uncorrelateCovarianceSetVariance<State::terrain.dof>(State::terrain.idx, 100.f);
-	_terrain_vpos_reset_counter++;
 
 	resetAidSourceStatusZeroInnovation(_aid_src_optical_flow);
 
 	_innov_check_fail_status.flags.reject_optflow_X = false;
 	_innov_check_fail_status.flags.reject_optflow_Y = false;
+
+
+	// record the state change
+	if (_state_reset_status.reset_count.hagl == _state_reset_count_prev.hagl) {
+		_state_reset_status.hagl_change = delta_terrain;
+
+	} else {
+		// there's already a reset this update, accumulate total delta
+		_state_reset_status.hagl_change += delta_terrain;
+	}
+
+	_state_reset_status.reset_count.hagl++;
 }
 
 void Ekf::stopFlowFusion()
